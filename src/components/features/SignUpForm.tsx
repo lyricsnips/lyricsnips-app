@@ -1,27 +1,56 @@
 "use client";
 
+import { signIn } from "next-auth/react";
+import { createUser } from "@/adapters/userAdapter";
 import { useState } from "react";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 export default function SignUpForm() {
-  const [name, setName] = useState("");
+  const [username, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { closeModal } = useAuthModal();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
 
-    console.log("Sign up attempt:", { name, email, password });
-    // Add your sign up logic here
+    setLoading(true);
+    const res = await createUser({ username, email, password });
+    setLoading(false);
+
+    if (res.error) {
+      setError(res.error);
+    } else {
+      // TO DO - handle errors if user cannot be logged in (session ongoing)
+      signIn("credentials", {
+        email: email,
+        password: password,
+        redirect: false,
+      });
+      setSuccess("User created successfully!");
+      // setName("");
+      // setEmail("");
+      // setPassword("");
+      // setConfirmPassword("");
+      closeModal();
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && <div className="text-red-600">{error}</div>}
+      {success && <div className="text-green-600">{success}</div>}
       <div>
         <label
           htmlFor="name"
@@ -32,14 +61,13 @@ export default function SignUpForm() {
         <input
           type="text"
           id="name"
-          value={name}
+          value={username}
           onChange={(e) => setName(e.target.value)}
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter your full name"
+          placeholder="Enter username"
         />
       </div>
-
       <div>
         <label
           htmlFor="email"
@@ -57,7 +85,6 @@ export default function SignUpForm() {
           placeholder="Enter your email"
         />
       </div>
-
       <div>
         <label
           htmlFor="password"
@@ -76,7 +103,6 @@ export default function SignUpForm() {
           placeholder="Enter your password"
         />
       </div>
-
       <div>
         <label
           htmlFor="confirmPassword"
@@ -95,12 +121,12 @@ export default function SignUpForm() {
           placeholder="Confirm your password"
         />
       </div>
-
       <button
         type="submit"
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        disabled={loading}
       >
-        Sign Up
+        {loading ? "Signing Up..." : "Sign Up"}
       </button>
     </form>
   );

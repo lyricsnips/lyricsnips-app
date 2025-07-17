@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(user, { status: 201 });
+    return NextResponse.json({ data: user }, { status: 201 });
   } catch (error: any) {
     console.error("Error creating user:", error);
 

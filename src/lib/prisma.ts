@@ -12,3 +12,4 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
 // In development, always reuse the same PrismaClient instance to avoid exhausting database connections
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+ 
