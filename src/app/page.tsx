@@ -5,12 +5,11 @@ import AuthModal from "@/components/features/AuthModal";
 import SearchBar from "@/components/features/SearchBar";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { useSession } from "next-auth/react";
+import ResultsList from "@/components/features/ResultsList";
 
 export default function Home() {
   const { data: session } = useSession();
   const { openModal } = useAuthModal();
-
-  console.log(session?.user.email);
 
   return (
     <>
@@ -25,7 +24,7 @@ export default function Home() {
         <h2>User Controls</h2>
         <h2>Current User: {session?.user.email || "undefined"}</h2>
         {session && (
-          <button type="button" onClick={() => signOut()}>
+          <button type="button" onClick={() => signOut({ redirect: false })}>
             Sign Out
           </button>
         )}
@@ -45,6 +44,7 @@ export default function Home() {
 
       <AuthModal />
       <SearchBar />
+      <ResultsList />
     </>
   );
 }
