@@ -2,11 +2,14 @@
 import { ReactNode } from "react";
 import { AuthModalProvider } from "@/contexts/AuthModalContext";
 import { SessionProvider } from "next-auth/react";
+import { SearchResultsProvider } from "@/contexts/SearchResultsContext";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      <AuthModalProvider>{children}</AuthModalProvider>;
+      <AuthModalProvider>
+        <SearchResultsProvider>{children}</SearchResultsProvider>
+      </AuthModalProvider>
     </SessionProvider>
   );
 }

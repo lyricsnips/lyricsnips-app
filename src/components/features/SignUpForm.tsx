@@ -32,17 +32,16 @@ export default function SignUpForm() {
     if (res.error) {
       setError(res.error);
     } else {
-      // TO DO - handle errors if user cannot be logged in (session ongoing)
       signIn("credentials", {
         email: email,
         password: password,
         redirect: false,
       });
       setSuccess("User created successfully!");
-      // setName("");
-      // setEmail("");
-      // setPassword("");
-      // setConfirmPassword("");
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
       closeModal();
     }
   };

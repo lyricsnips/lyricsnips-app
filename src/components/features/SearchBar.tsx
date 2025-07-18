@@ -1,10 +1,19 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { getSongs } from "@/adapters/YTAdapter";
+import { useSearchResults } from "@/contexts/SearchResultsContext";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
+  const { setSearchResults } = useSearchResults();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+    // Fetch from external YT python API
+    const results = await getSongs(query);
+    if (results.data) {
+      setSearchResults(results.data);
+      setQuery("");
+    }
   };
 
   return (
