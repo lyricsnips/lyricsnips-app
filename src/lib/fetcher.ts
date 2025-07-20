@@ -2,13 +2,14 @@ export interface FetcherOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: any;
   headers?: Record<string, string>;
+  responseType?: "json" | "blob";
 }
 
 export async function fetcher<T>(
   url: RequestInfo,
   options: FetcherOptions = {}
 ): Promise<T> {
-  const { method = "GET", body, headers = {} } = options;
+  const { method = "GET", body, headers = {}, responseType = "json" } = options;
 
   const fetchOptions: RequestInit = {
     method,
@@ -35,5 +36,8 @@ export async function fetcher<T>(
     throw new Error(errorMsg);
   }
 
+  if (responseType === "blob") {
+    return (await res.blob()) as T;
+  }
   return await res.json();
 }

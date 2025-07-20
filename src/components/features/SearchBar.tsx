@@ -10,6 +10,7 @@ export default function SearchBar() {
     e.preventDefault();
     // Fetch from external YT python API
     const results = await getSongs(query);
+
     if (results.data) {
       setSearchResults(results.data);
       setQuery("");
@@ -22,7 +23,7 @@ export default function SearchBar() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search song..."
+        placeholder="Search song or lyric..."
         className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button

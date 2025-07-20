@@ -19,4 +19,15 @@ model User {
   email             String   @unique
   password_hash     String   
   createdAt         DateTime @default(now())
+  shares            Share[]
+}
+
+model Share {
+  id              String   @id @default(cuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  videoId         String
+  lyrics_preview_src  String
+  lyricsJson      Json
+  createdAt       DateTime @default(now())
 }
