@@ -11,16 +11,14 @@ export default function ResultsList() {
   };
 
   return (
-    <>
-      <ul>
-        {results.map((song: any) => {
-          return (
-            <li key={song.videoId}>
-              <SongCard song={song} handlePlay={handlePlay}></SongCard>
-            </li>
-          );
-        })}
-      </ul>
-    </>
+    <ul>
+      {results.map((song: any) => {
+        return (
+          <li key={song.videoId}>
+            <SongCard song={song} handlePlay={handlePlay}></SongCard>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

@@ -5,18 +5,18 @@ import { useAuthModal } from "@/contexts/AuthModalContext";
 import { useState } from "react";
 
 export default function LogInForm() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { closeModal } = useAuthModal();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     signIn("credentials", {
-      email: email,
+      username: username,
       password: password,
       redirect: false,
     });
-    setEmail("");
+    setUsername("");
     setPassword("");
     closeModal();
   };
@@ -25,19 +25,19 @@ export default function LogInForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label
-          htmlFor="email"
+          htmlFor="username"
           className="block text-sm font-medium text-gray-700"
         >
-          Email
+          Username
         </label>
         <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          id="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter your email"
+          placeholder="Enter your username"
         />
       </div>
 

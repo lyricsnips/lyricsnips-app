@@ -1,4 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
+import { prisma } from "@/lib/prisma";
 
 // Returns a png (white canvas and lyrics for now)
 export async function generateImage({
@@ -19,8 +20,6 @@ export async function generateImage({
     return { data: null, error: e.message || "Unknown error" };
   }
 }
-
-import { prisma } from "@/lib/prisma";
 
 export async function fetchSharedLyrics(shareId: string) {
   try {
@@ -60,6 +59,17 @@ export async function fetchSharedLyrics(shareId: string) {
     };
   } catch (e: any) {
     console.error("Error in fetchSharedLyrics:", e);
+    return { data: null, error: e.message || "Unknown error" };
+  }
+}
+
+export async function getSharedLyrics(videoId: string) {
+  try {
+    const res = await fetcher<{ data?: any }>(`api/lyrics/${videoId}`, {
+      method: "GET",
+    });
+    return { data: res, error: null };
+  } catch (e: any) {
     return { data: null, error: e.message || "Unknown error" };
   }
 }

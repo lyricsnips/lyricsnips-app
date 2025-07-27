@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 // AppProvider combines multiple context providers for easy integration within the entire app
 import { AppProviders } from "@/providers/AppProviders";
+import Navbar from "@/components/features/Navbar";
+import AuthModal from "@/components/features/AuthModal";
 
 import "./globals.css";
 
@@ -28,9 +30,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex flex-col`}
       >
-          <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <AuthModal></AuthModal>
+          <Navbar></Navbar>
+          <main className="flex-1 overflow-hidden">{children}</main>
+        </AppProviders>
       </body>
     </html>
   );

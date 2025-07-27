@@ -1,0 +1,39 @@
+import { useTabContext } from "@/contexts/CurrentTabContext";
+import { useSearchResults } from "@/contexts/SearchResultsContext";
+import { Geo } from "next/font/google";
+
+const geo = Geo({
+  weight: ["400"],
+});
+
+export default function Tabs() {
+  const { currentTab, setTab } = useTabContext();
+  const { results } = useSearchResults();
+
+  return (
+    <div className="mt-2 mb-2 flex gap-4 w-full">
+      {results.length > 0 && (
+        <button
+          onClick={() => setTab("search")}
+          className={`${geo.className} ${
+            currentTab === "search"
+              ? "border-black bg-white text-black"
+              : "border-white bg-black text-white-700 hover:bg-white hover:text-black hover:border-black"
+          } px-3 py-1 font-semibold border cursor-pointer transition w-full`}
+        >
+          Search Results
+        </button>
+      )}
+      <button
+        onClick={() => setTab("trending")}
+        className={`${geo.className} ${
+          currentTab === "trending"
+            ? "border-black bg-white text-black"
+            : "border-white bg-black text-white-700 hover:bg-white hover:text-black hover:border-black"
+        } px-3 py-1 font-semibold border cursor-pointer transition w-full`}
+      >
+        Trending
+      </button>
+    </div>
+  );
+}

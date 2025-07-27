@@ -1,11 +1,6 @@
 import { fetcher } from "@/lib/fetcher";
 
-interface Song {
-  videoId: "your_video_id_here";
-  lyricsJson: Object[];
-}
-
-const baseUrl = "http://127.0.0.1:5000/songs/";
+const baseUrl = "http://127.0.0.1:8000/songs/";
 
 export async function getSongs(query: string) {
   try {
@@ -41,6 +36,18 @@ export async function getSong(videoId: string) {
       method: "GET",
     });
     return { data: res.data, error: null };
+  } catch (e: any) {
+    return { data: null, error: e.message || "Unknown error" };
+  }
+}
+
+export async function getTrendingSongs() {
+  try {
+    const res = await fetcher<{ data?: any }>(`api/trending`, {
+      method: "GET",
+    });
+
+    return { data: res, error: null };
   } catch (e: any) {
     return { data: null, error: e.message || "Unknown error" };
   }

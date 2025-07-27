@@ -7,7 +7,6 @@ import { useAuthModal } from "@/contexts/AuthModalContext";
 
 export default function SignUpForm() {
   const [username, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,20 +25,19 @@ export default function SignUpForm() {
     }
 
     setLoading(true);
-    const res = await createUser({ username, email, password });
+    const res = await createUser({ username, password });
     setLoading(false);
 
     if (res.error) {
       setError(res.error);
     } else {
       signIn("credentials", {
-        email: email,
+        username: username,
         password: password,
         redirect: false,
       });
       setSuccess("User created successfully!");
       setName("");
-      setEmail("");
       setPassword("");
       setConfirmPassword("");
       closeModal();
@@ -52,36 +50,19 @@ export default function SignUpForm() {
       {success && <div className="text-green-600">{success}</div>}
       <div>
         <label
-          htmlFor="name"
+          htmlFor="username"
           className="block text-sm font-medium text-gray-700"
         >
-          Full Name
+          Username
         </label>
         <input
           type="text"
-          id="name"
+          id="username"
           value={username}
           onChange={(e) => setName(e.target.value)}
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           placeholder="Enter username"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter your email"
         />
       </div>
       <div>

@@ -9,9 +9,8 @@ export async function GET() {
       select: {
         id: true,
         username: true,
-        email: true,
         createdAt: true,
-        // Don't include password_hash for security
+        // Don't include password_hash or email for security
       },
     });
 
@@ -28,7 +27,7 @@ export async function GET() {
 // POST - Create a new user
 export async function POST(request: NextRequest) {
   try {
-    const { username, email, password } = await request.json();
+    const { username, password } = await request.json();
 
     // Hash the password
     const password_hash = await bcrypt.hash(password, 12);
@@ -37,15 +36,13 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         username,
-        email,
         password_hash,
       },
       select: {
         id: true,
         username: true,
-        email: true,
         createdAt: true,
-        // Don't include password_hash in response
+        // Don't include password_hash or email in response
       },
     });
 
@@ -56,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Handle unique constraint violations
     if (error.code === "P2002") {
       return NextResponse.json(
-        { error: "Username or email already exists" },
+        { error: "Username already exists" },
         { status: 400 }
       );
     }

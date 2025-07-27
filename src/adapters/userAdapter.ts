@@ -3,7 +3,6 @@ import { signIn } from "next-auth/react";
 
 interface userData {
   username: string;
-  email: string;
   password: string;
 }
 

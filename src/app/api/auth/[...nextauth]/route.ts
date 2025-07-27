@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 
 interface Credentials {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -14,13 +14,13 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: Credentials | undefined) {
-        // 1. Find user by email
+        // 1. Find user by username
         const user = await prisma.user.findUnique({
-          where: { email: credentials?.email },
+          where: { username: credentials?.username },
         });
 
         // 2. If no user or password doesn't match, return null
@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // 3. Return user object (omit password)
-        return { id: user.id, username: user.username, email: user.email };
+        return { id: user.id, username: user.username };
       },
     }),
   ],
@@ -41,11 +41,19 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.username = (user as unknown as { username: string }).username;
+      }
+      return token;
+    },
     async session({ session, token }) {
       // Attach user id to session because NextAuth only includes email and username by default,
       // but the id is needed for user-specific features and database queries.
       if (token && session.user) {
         session.user.id = token.sub ?? "";
+        session.user.username =
+          typeof token.username === "string" ? token.username : "";
       }
       return session;
     },

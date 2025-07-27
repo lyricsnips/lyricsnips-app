@@ -1,50 +1,26 @@
 "use client";
 
-import { signOut } from "next-auth/react";
-import AuthModal from "@/components/features/AuthModal";
 import SearchBar from "@/components/features/SearchBar";
-import { useAuthModal } from "@/contexts/AuthModalContext";
-import { useSession } from "next-auth/react";
 import ResultsList from "@/components/features/ResultsList";
+import TrendingList from "@/components/features/TrendingList";
+import Title from "@/components/items/Title";
+import { useTabContext } from "@/contexts/CurrentTabContext";
 
 export default function Home() {
-  const { data: session } = useSession();
-  const { openModal } = useAuthModal();
+  const { currentTab } = useTabContext();
 
   return (
-    <>
-      <h1>Lyricsnips</h1>
-      <div
-        style={{
-          backgroundColor: "green",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <h2>User Controls</h2>
-        <h2>Current User: {session?.user.email || "undefined"}</h2>
-        {session && (
-          <button type="button" onClick={() => signOut({ redirect: false })}>
-            Sign Out
-          </button>
-        )}
-        <p></p>
-        <h2>Auth</h2>
-        {!session && (
-          <button type="button" onClick={() => openModal("login")}>
-            Log in
-          </button>
-        )}
-        {!session && (
-          <button type="button" onClick={() => openModal("signup")}>
-            Sign Up
-          </button>
-        )}
+    <div className="h-full flex flex-col">
+      <Title />
+      <div className="w-full flex justify-center flex-1 overflow-hidden">
+        <div className="ml-8 mr-8 w-full max-w-4xl flex flex-col">
+          <SearchBar />
+          <div className="flex-1 overflow-y-auto">
+            {currentTab === "search" && <ResultsList />}
+            {currentTab === "trending" && <TrendingList />}
+          </div>
+        </div>
       </div>
-
-      <AuthModal />
-      <SearchBar />
-      <ResultsList />
-    </>
+    </div>
   );
 }

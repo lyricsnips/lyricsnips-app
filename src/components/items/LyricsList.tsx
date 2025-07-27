@@ -5,13 +5,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Lyric from "./Lyric";
 
+interface LyricsListProps {
+  lyrics: any;
+  currentLyric: any;
+  onUserScroll?: () => void;
+  playerInstanceRef: any;
+}
+
 export default function LyricsList({
   lyrics,
   currentLyric,
-}: {
-  lyrics: any;
-  currentLyric: any;
-}) {
+  onUserScroll,
+  playerInstanceRef,
+}: LyricsListProps) {
   const [alert, setAlert] = useState("");
   const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
   const router = useRouter();
@@ -49,6 +55,12 @@ export default function LyricsList({
     }
   };
 
+  const handleScroll = () => {
+    if (onUserScroll) {
+      onUserScroll();
+    }
+  };
+
   if (lyrics?.length === 0) {
     return <div className="text-gray-500">Loading...</div>;
   }
@@ -67,21 +79,53 @@ export default function LyricsList({
     );
   }
 
+  const handleClick = (lyric: any) => {
+    if (playerInstanceRef.current && playerInstanceRef.current.getPlayerState) {
+      try {
+        // Convert milliseconds to seconds
+        const seekTime = lyric.start_time / 1000;
+        playerInstanceRef.current.seekTo(seekTime);
+
+        // Optionally start playing if paused
+        const playerState = playerInstanceRef.current.getPlayerState();
+        if (playerState !== 1) {
+          // 1 = playing
+          playerInstanceRef.current.playVideo();
+        }
+      } catch (error) {
+        console.error("Error seeking to lyric:", error);
+      }
+    }
+  };
+
   return (
     <>
       {selectedLyrics.length > 0 && <p>{alert}</p>}
       {lyrics && (
-        <div className="border rounded divide-y">
+        <div
+          className="flex flex-col items-center text-center px-4 pb-20"
+          onScroll={handleScroll}
+          onWheel={handleScroll}
+          onTouchMove={handleScroll}
+        >
           {lyrics.map((lyric: any) => (
-            <Lyric
+            <div
               key={lyric.id}
-              lyric={lyric}
-              active={currentLyric?.id === lyric.id}
-              selected={selectedLyrics.some(
-                (curr: any) => curr.id === lyric.id
-              )}
-              handleSelect={handleSelect}
-            />
+              id={`lyric-${lyric.id}`}
+              className={`lyric-item ${
+                currentLyric?.id === lyric.id ? "active" : ""
+              }`}
+            >
+              <Lyric
+                lyric={lyric}
+                active={currentLyric?.id === lyric.id}
+                selected={selectedLyrics.some(
+                  (curr: any) => curr.id === lyric.id
+                )}
+                handleSelect={handleSelect}
+                handleClick={handleClick}
+              />
+            </div>
           ))}
         </div>
       )}
