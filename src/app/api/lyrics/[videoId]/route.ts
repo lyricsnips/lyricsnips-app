@@ -9,7 +9,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Params }
 ) {
-  const videoId = params.videoId;
+  const parameters = await params;
+  const videoId = parameters.videoId;
 
   if (!videoId)
     NextResponse.json({ error: "videoId must be provided" }, { status: 400 });

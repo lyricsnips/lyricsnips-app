@@ -1,6 +1,14 @@
 "use client";
 
-import { X, Share, Play, Pause, RotateCcw, TextSelectIcon } from "lucide-react";
+import {
+  X,
+  Share,
+  Play,
+  Pause,
+  RotateCcw,
+  TextSelectIcon,
+  Sparkle,
+} from "lucide-react";
 import { defaultButtonStyle, closeButtonStyle } from "@/styles/Buttons";
 import { useRef, useEffect, use, useState, useCallback } from "react";
 import YoutubePlayer from "youtube-player";
@@ -11,6 +19,7 @@ import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { getLyrics } from "@/adapters/YTAdapter";
 import { getSong } from "@/adapters/YTAdapter";
 import { Special_Gothic_Expanded_One } from "next/font/google";
+import AskChatBot from "@/components/features/AskChatbox";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
@@ -71,10 +80,10 @@ export default function SongPage({ params }: { params: any }) {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [sharedLyric, setSharedLyric] = useState<any>(null);
+  const [isAsking, setAsking] = useState(false);
 
   // Auto-scroll hook
-  const { autoScrollEnabled, handleUserScroll } = useAutoScroll(currentLyric);
+  const { handleUserScroll } = useAutoScroll(currentLyric);
 
   // Effect 1: Fetch lyrics and set up YouTube player when videoId changes
   useEffect(() => {
@@ -270,7 +279,7 @@ export default function SongPage({ params }: { params: any }) {
           />
         </div>
 
-        {selectedLyrics.length > 0 && (
+        {selectedLyrics.length > 0 && !isAsking && (
           <div className="w-full flex gap-2 justify-center fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 ">
             <button
               type="button"
@@ -288,8 +297,17 @@ export default function SongPage({ params }: { params: any }) {
               <Share size="20" />
               Share
             </button>
+            <button
+              type="button"
+              className={defaultButtonStyle}
+              onClick={() => setAsking(true)}
+            >
+              <Sparkle size="20" />
+              Ask
+            </button>
           </div>
         )}
+        {isAsking && <AskChatBot setAsking={setAsking} songInfo={songInfo} lyrics={lyrics} />}
       </div>
     </>
   );

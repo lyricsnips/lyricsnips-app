@@ -1,6 +1,12 @@
 import { fetcher } from "@/lib/fetcher";
 import { prisma } from "@/lib/prisma";
 
+interface askGeminiTypes {
+  query: string;
+  context: any[];
+  songInfo: any;
+}
+
 // Returns a png (white canvas and lyrics for now)
 export async function generateImage({
   videoId,
@@ -67,6 +73,18 @@ export async function getSharedLyrics(videoId: string) {
   try {
     const res = await fetcher<{ data?: any }>(`api/lyrics/${videoId}`, {
       method: "GET",
+    });
+    return { data: res, error: null };
+  } catch (e: any) {
+    return { data: null, error: e.message || "Unknown error" };
+  }
+}
+
+export async function askGemini(body: askGeminiTypes) {
+  try {
+    const res = await fetcher<{ data?: any }>("/api/askgemini", {
+      method: "POST",
+      body: body,
     });
     return { data: res, error: null };
   } catch (e: any) {
