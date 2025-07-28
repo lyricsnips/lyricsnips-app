@@ -8,12 +8,14 @@ export default function Lyric({
   selected,
   handleSelect,
   handleClick,
+  isSelecting,
 }: {
   lyric: any;
   active: boolean;
   selected: boolean;
   handleSelect: (lyric: any) => void;
   handleClick: (lyric: any) => void;
+  isSelecting: boolean;
 }) {
   return (
     <div
@@ -35,8 +37,11 @@ export default function Lyric({
         text-2xl
         `}
       onClick={() => {
-        // handleSelect(lyric);
-        handleClick(lyric);
+        if (isSelecting) {
+          handleSelect(lyric);
+        } else {
+          handleClick(lyric);
+        }
       }}
     >
       {lyric.text}

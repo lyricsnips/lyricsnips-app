@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Share, Play, Pause, RotateCcw } from "lucide-react";
+import { X, Share, Play, Pause, RotateCcw, TextSelectIcon } from "lucide-react";
 import { defaultButtonStyle, closeButtonStyle } from "@/styles/Buttons";
 import { useRef, useEffect, use, useState, useCallback } from "react";
 import YoutubePlayer from "youtube-player";
@@ -70,6 +70,7 @@ export default function SongPage({ params }: { params: any }) {
   const playerInstanceRef = useRef<any>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
   const [sharedLyric, setSharedLyric] = useState<any>(null);
 
   // Auto-scroll hook
@@ -189,6 +190,10 @@ export default function SongPage({ params }: { params: any }) {
     setSelectedLyrics([]);
   };
 
+  const toggleNavigationMode = () => {
+    setIsSelecting(!isSelecting);
+  };
+
   return (
     <>
       {showShareModal && (
@@ -221,18 +226,36 @@ export default function SongPage({ params }: { params: any }) {
 
             {/* Player Controls */}
             <div className="flex gap-2 justify-center mt-4">
-              <button
-                onClick={handlePlayPause}
-                className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors"
-              >
-                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-              </button>
-              <button
-                onClick={handleRestart}
-                className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors"
-              >
-                <RotateCcw size={20} />
-              </button>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={handlePlayPause}
+                  className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors"
+                >
+                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                </button>
+                <span> {isPlaying ? "Pause" : "Play"}</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={handleRestart}
+                  className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors"
+                >
+                  <RotateCcw size={20} />
+                </button>
+                <span>Replay</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={toggleNavigationMode}
+                  className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors w-fit"
+                >
+                  <TextSelectIcon
+                    size={20}
+                    color={isSelecting ? "#ffffff" : "#1d2327"}
+                  />
+                </button>
+                <span>{isSelecting ? "Skip to Lyric" : "Select Lyrics"}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -243,6 +266,7 @@ export default function SongPage({ params }: { params: any }) {
             currentLyric={currentLyric}
             onUserScroll={handleUserScroll}
             playerInstanceRef={playerInstanceRef}
+            isSelecting={isSelecting}
           />
         </div>
 

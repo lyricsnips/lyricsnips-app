@@ -10,6 +10,7 @@ interface LyricsListProps {
   currentLyric: any;
   onUserScroll?: () => void;
   playerInstanceRef: any;
+  isSelecting: boolean;
 }
 
 export default function LyricsList({
@@ -17,6 +18,7 @@ export default function LyricsList({
   currentLyric,
   onUserScroll,
   playerInstanceRef,
+  isSelecting,
 }: LyricsListProps) {
   const [alert, setAlert] = useState("");
   const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
@@ -124,6 +126,7 @@ export default function LyricsList({
                 )}
                 handleSelect={handleSelect}
                 handleClick={handleClick}
+                isSelecting={isSelecting}
               />
             </div>
           ))}

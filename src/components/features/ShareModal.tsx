@@ -16,7 +16,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
   const lyricCardRef = useRef(null);
   const [shareData, setShareData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
-  const { selectedLyrics } = useSelectedLyrics();
+  const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
   const [settings, setSettings] = useState<CustomizeSettings>({
     backgroundColor: "#f8f9fa",
     fontFamily: "Arial, sans-serif",
@@ -97,6 +97,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
+      setSelectedLyrics([]); // Clear selected lyrics
     }
   };
 
@@ -122,7 +123,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
           ref={lyricCardRef}
         >
           <ul>
-            {selectedLyrics.map((lyric: any, index: number) => {
+            {[...selectedLyrics].map((lyric: any, index: number) => {
               return (
                 <li
                   key={index}
