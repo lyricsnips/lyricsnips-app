@@ -3,28 +3,48 @@ import { prisma } from "@/lib/prisma";
 
 // GET /api/trending
 export async function GET() {
-  // Example: return a list of songs (empty for now)
   try {
-    const trending = await prisma.share.groupBy({
+    // First, get the trending videoIds with their counts
+    const trendingCounts = await prisma.cachedSong.groupBy({
       by: ["videoId"],
       _count: {
         videoId: true,
       },
     });
 
-    const formatted = trending.map((item) => ({
-      videoId: item.videoId,
-      count: item._count.videoId,
-    }));
+    // Sort by count descending and get top 10
+    const sortedCounts = trendingCounts
+      .sort((a, b) => b._count.videoId - a._count.videoId)
+      .slice(0, 10);
 
-    // Sort by count descending
-    const sorted = formatted.sort((a, b) => b.count - a.count);
+    // Fetch the song metadata for each trending videoId
+    const trendingSongs = await Promise.all(
+      sortedCounts.map(async (item) => {
+        const cachedSong = await prisma.cachedSong.findUnique({
+          where: { videoId: item.videoId },
+          select: {
+            videoId: true,
+            title: true,
+            author: true,
+            thumbnails: true,
+          },
+        });
 
-    return NextResponse.json(sorted.slice(0, 10));
+        return {
+          videoId: item.videoId,
+          title: cachedSong?.title || "Unknown Title",
+          author: cachedSong?.author || "Unknown Artist",
+          thumbnails: cachedSong?.thumbnails || [],
+          count: item._count.videoId,
+        };
+      })
+    );
+
+    return NextResponse.json(trendingSongs);
   } catch (error) {
-    console.error("Error in GET /api/shares:", error);
+    console.error("Error in GET /api/trending:", error);
     return NextResponse.json(
-      { error: "Failed to fetch shares" },
+      { error: "Failed to fetch trending songs" },
       { status: 500 }
     );
   }

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState } from "react";
 
 interface TrendingResultsContextType {
   trendingResults: any[];
-  setTrendingResults: React.Dispatch<React.SetStateAction<any[]>>;
+  setTrendingResults: any;
 }
 
 const TrendingResultsContext = createContext<

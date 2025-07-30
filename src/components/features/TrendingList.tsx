@@ -18,28 +18,23 @@ export default function TrendingList() {
 
       if (!res.data) return;
 
-      const songPromises = res.data.map(async (song: any) => {
-        const res: any = await getSong(song.videoId);
-        if (res.data) {
-          return {
-            videoId: res.data.videoDetails.videoId,
-            thumbnails: res.data.videoDetails.thumbnail.thumbnails,
-            title: res.data.videoDetails.title,
-            artists: res.data.videoDetails.author,
-            timesShared: song.count,
-          };
-        }
+      const cleanResults = res.data.map((song: any) => {
+        return {
+          videoId: song.videoId,
+          title: song.title,
+          thumbnails: song.thumbnails,
+          artists: song.author,
+          timesShared: song.count,
+        };
       });
 
-      const songs = await Promise.all(songPromises);
-
-      setTrendingResults(songs);
+      setTrendingResults(cleanResults);
 
       const resultsMap: any = new Map(
-        songs.map((song: any) => [song.videoId, song])
+        cleanResults.map((song: any) => [song.videoId, song])
       );
 
-      songs.forEach(async (song: any) => {
+      cleanResults.forEach(async (song: any) => {
         try {
           const lyrics = await getSharedLyrics(song.videoId);
           const updatedSong =

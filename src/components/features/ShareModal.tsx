@@ -68,6 +68,12 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       formData.append("image", blob, "component-image.png");
       formData.append("videoId", songInfo.videoId); // videoId
       formData.append("lyrics", JSON.stringify(selectedLyrics)); // Convert array to JSON string
+      formData.append(
+        "thumbnails",
+        JSON.stringify(songInfo.thumbnail.thumbnails)
+      );
+      formData.append("title", songInfo.title);
+      formData.append("author", songInfo.author);
       formData.append("filename", `image-${Date.now()}.png`); // Custom filename
 
       // Upload to S3 and return link to image

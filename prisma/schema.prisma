@@ -30,3 +30,13 @@ model Share {
   lyricsJson      Json
   createdAt       DateTime @default(now())
 }
+
+model CachedSong {
+  id          String   @id @default(cuid())
+  videoId     String  
+  thumbnails  Json[]
+  title       String
+  author      String
+  updatedAt   DateTime @default(now())
+  createdAt   DateTime @default(now())
+}

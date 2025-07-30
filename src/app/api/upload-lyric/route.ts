@@ -14,6 +14,9 @@ export async function POST(req: NextRequest) {
     const imageFile = formData.get("image") as File;
     const videoId = formData.get("videoId") as string;
     const lyrics = formData.get("lyrics") as string;
+    const author = formData.get("author") as string;
+    const title = formData.get("title") as string;
+    const thumbnailsRaw = formData.get("thumbnails") as string;
 
     // Validate required fields
     if (!imageFile || !videoId || !lyrics) {
@@ -37,7 +40,7 @@ export async function POST(req: NextRequest) {
         userId: userId,
         videoId: videoId,
         lyrics_preview_src: imageUrl,
-        lyricsJson: lyrics,
+        lyricsJson: JSON.parse(lyrics),
       },
       select: {
         id: true,
@@ -46,8 +49,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Store in cache for trending tab to fetch in the future
+    await prisma.cachedSong.create({
+      data: {
+        videoId,
+        thumbnails: JSON.parse(thumbnailsRaw),
+        title,
+        author,
+      },
+    });
+
     return NextResponse.json({ ...image });
   } catch (e) {
-    return NextResponse.json({ error: e }), 400;
+    console.error("Upload lyric error:", e);
+    return NextResponse.json({ error: e }, { status: 400 });
   }
 }
