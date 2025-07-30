@@ -1,4 +1,8 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -28,4 +32,23 @@ export async function uploadToS3({
   });
   await s3.send(command);
   return `https://${BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+}
+
+export async function removeFromS3ByUrl({ imageUrl }: { imageUrl: string }) {
+  try {
+    // Extract the key from the S3 URL
+    const key = imageUrl.split(".com/")[1];
+
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+    });
+
+    await s3.send(command);
+    console.log(`Successfully deleted ${key} from S3`);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting from S3:`, error);
+    throw error;
+  }
 }

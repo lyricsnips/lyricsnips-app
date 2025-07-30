@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import sharp from "sharp";
 import { uploadToS3 } from "@/lib/s3";
 import { randomUUID } from "crypto";
 import { getServerSession } from "next-auth";

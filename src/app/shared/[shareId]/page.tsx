@@ -1,12 +1,13 @@
 import { fetchSharedLyrics } from "@/adapters/lyricAdapter";
 import { Metadata } from "next";
+import { Frown } from "lucide-react";
 
 export async function generateMetadata({
   params,
 }: {
   params: { shareId: string };
 }): Promise<Metadata> {
-  const { shareId } = params;
+  const { shareId } = await params;
   const { data: sharedLyrics } = await fetchSharedLyrics(shareId);
 
   if (!sharedLyrics) {
@@ -42,19 +43,33 @@ export default async function SharedLyricsPage({
   const { shareId } = await params;
 
   const sharedLyrics: any = await fetchSharedLyrics(shareId);
+
+  if (!sharedLyrics.data)
+    return (
+      <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-10">
+        <Frown size="100" color="black" />
+        <p className="text-gray-500 mb-2">This link is no longer available</p>
+        <a
+          href={"/"}
+          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-center font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Go Home
+        </a>
+      </div>
+    );
+
   const videoId = sharedLyrics.data.videoId;
   const lyricsPageUrl = `/song/${videoId}`;
   const youtubeMusicUrl = `https://music.youtube.com/watch?v=${videoId}`;
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-10">
-      <h1 className="text-2xl font-bold mb-4">LyricSnips</h1>
-      <p className="text-gray-500 mb-2">
-        Shared by: {sharedLyrics.data.user?.username || "Anonymous"}
-      </p>
       <div className="bg-gray-100 rounded p-4 mb-4">
         <img src={sharedLyrics.data.lyricsPreviewSrc} alt="" />
       </div>
+      <p className="text-gray-500 mb-2">
+        Shared by: {sharedLyrics.data.user?.username || "Anonymous"}
+      </p>
       <div className="flex gap-4 mb-4">
         <a
           href={youtubeMusicUrl}

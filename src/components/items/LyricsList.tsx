@@ -105,7 +105,7 @@ export default function LyricsList({
       {selectedLyrics.length > 0 && <p>{alert}</p>}
       {lyrics && (
         <div
-          className="flex flex-col items-center text-center px-4 pb-20"
+          className="flex flex-col items-center text-center"
           onScroll={handleScroll}
           onWheel={handleScroll}
           onTouchMove={handleScroll}

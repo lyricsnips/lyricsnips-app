@@ -69,7 +69,7 @@ export default function SongPage({ params }: { params: any }) {
   const { videoId } = use<any>(params);
   const [songInfo, setSongInfo] = useState<any>({});
   const [lyrics, setLyrics] = useState<any>([]);
-  const [currentLyric, setCurrentLyric] = useState(null);
+  const [currentLyric, setCurrentLyric] = useState<any>(null);
   const [playerStatus, setPlayerStatus] = useState<number | undefined>(
     undefined
   );
@@ -151,6 +151,7 @@ export default function SongPage({ params }: { params: any }) {
     if (playerStatus === 1 && lyrics?.length > 0 && playerInstanceRef.current) {
       intervalRef.current = setInterval(async () => {
         const currentTime = await playerInstanceRef.current.getCurrentTime();
+
         const foundLyric: any = lyrics.find((lyric: any) => {
           const startTimeSeconds = lyric.start_time / 1000;
           const endTimeSeconds = lyric.end_time / 1000;
@@ -158,14 +159,20 @@ export default function SongPage({ params }: { params: any }) {
             currentTime >= startTimeSeconds && currentTime <= endTimeSeconds
           );
         });
-        // Only update if the lyric actually changed
-        setCurrentLyric((prev: any) => {
-          if (foundLyric && foundLyric.id !== prev?.id) {
-            return foundLyric;
-          }
-          return prev;
-        });
-      }, 50);
+
+        // Set lyric to null when last lyric is reached
+        if (currentTime > lyrics[lyrics.length - 1].end_time / 1000) {
+          setCurrentLyric(null);
+        } else {
+          // Only update if the lyric actually changed
+          setCurrentLyric((prev: any) => {
+            if (foundLyric && foundLyric.id !== prev?.id) {
+              return foundLyric;
+            }
+            return prev;
+          });
+        }
+      }, 100);
     }
 
     // Cleanup: clear the interval when effect dependencies change or component unmounts
@@ -269,14 +276,17 @@ export default function SongPage({ params }: { params: any }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
-          <LyricsList
-            lyrics={lyrics}
-            currentLyric={currentLyric}
-            onUserScroll={handleUserScroll}
-            playerInstanceRef={playerInstanceRef}
-            isSelecting={isSelecting}
-          />
+        <div className="flex-1 overflow-y-auto flex flex-col justify-start items-center gap-5 pb-20">
+          <div>
+            <LyricsList
+              lyrics={lyrics}
+              currentLyric={currentLyric}
+              onUserScroll={handleUserScroll}
+              playerInstanceRef={playerInstanceRef}
+              isSelecting={isSelecting}
+            />
+          </div>
+          <p className="text-gray-400 text-sm">Lyrics by Youtube Music</p>
         </div>
 
         {selectedLyrics.length > 0 && !isAsking && (
@@ -307,7 +317,13 @@ export default function SongPage({ params }: { params: any }) {
             </button>
           </div>
         )}
-        {isAsking && <AskChatBot setAsking={setAsking} songInfo={songInfo} lyrics={lyrics} />}
+        {isAsking && (
+          <AskChatBot
+            setAsking={setAsking}
+            songInfo={songInfo}
+            lyrics={lyrics}
+          />
+        )}
       </div>
     </>
   );
