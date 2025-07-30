@@ -47,7 +47,7 @@ export default function Navbar() {
   const title = "LyricSnips";
 
   return (
-    <div className="w-full text-white px-6 py-3 relative flex items-center justify-center pt-5 pb-5  border-b-1">
+    <div className="w-full text-white px-3 py-2 relative flex items-center justify-center   border-b-1">
       {/* Centered Title */}
       <div
         className={`text-2xl ${gothic.className} cursor-pointer`}
