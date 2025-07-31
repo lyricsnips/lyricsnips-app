@@ -22,6 +22,7 @@ export async function GET(
       },
       select: {
         id: true,
+        userId: true,
         videoId: true,
         lyrics_preview_src: true,
         lyricsJson: true,
@@ -29,7 +30,23 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(lyrics);
+    const result = await Promise.all(
+      lyrics.map(async (share: any) => {
+        if (!share.userId) return { ...share };
+        const user = await prisma.user.findUnique({
+          where: {
+            id: share.userId,
+          },
+          select: {
+            username: true,
+          },
+        });
+
+        return { ...share, username: user?.username };
+      })
+    );
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error in GET /api/lyrics:", error);
     return NextResponse.json(

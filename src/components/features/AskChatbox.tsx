@@ -56,16 +56,14 @@ export default function AskChatBot({
   };
 
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-3 ">
+    <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-3 w-full max-w-md px-4">
       {/* Answer Popup Box */}
       {answer && (
-        <div className="bg-black border border-gray-700  p-4 max-w-md w-full shadow-lg ">
+        <div className="bg-black border border-gray-700  p-4 w-full shadow-lg">
           <div className="flex justify-between items-start mb-2">
             <div className="flex items-center gap-2">
-              <Sparkle size="16" className="text-blue-400" />
-              <span className="text-blue-400 text-sm font-medium">
-                AI Response
-              </span>
+              <Sparkle size="16" color="white" />
+              <span className="text-sm font-medium">AI Response</span>
             </div>
             <button
               onClick={clearAnswer}
@@ -82,17 +80,17 @@ export default function AskChatBot({
 
       {/* Loading Indicator */}
       {isLoading && (
-        <div className="bg-black border border-gray-700 rounded-lg p-3 max-w-md w-full shadow-lg">
+        <div className="bg-black border border-gray-700  p-3 w-full shadow-lg">
           <div className="flex items-center gap-2 text-white text-sm">
-            <Sparkle size="16" className="animate-spin text-blue-400" />
+            <Sparkle size="16" className="animate-spin" />
             <span>Thinking...</span>
           </div>
         </div>
       )}
 
       {/* Input Area */}
-      <div className="w-full flex gap-2 justify-center items-center px-4 py-2 bg-black  border border-gray-700">
-        <Sparkle size="20" className="text-blue-400" />
+      <div className="w-full flex gap-2 justify-center items-center px-4 py-2 bg-black border border-white ">
+        <Sparkle size="20" />
         <input
           type="text"
           className="flex-1 bg-transparent border-none outline-none text-white placeholder-gray-400"

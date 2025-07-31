@@ -1,9 +1,10 @@
 "use client";
 
 import { useSelectedLyrics } from "../../contexts/SelectedLyricsContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Lyric from "./Lyric";
+import { X } from "lucide-react";
 
 interface LyricsListProps {
   lyrics: any;
@@ -21,8 +22,21 @@ export default function LyricsList({
   isSelecting,
 }: LyricsListProps) {
   const [alert, setAlert] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
   const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
   const router = useRouter();
+
+  // Auto-dismiss alert after 3 seconds
+  useEffect(() => {
+    if (alert && showAlert) {
+      const timer = setTimeout(() => {
+        setShowAlert(false);
+        setAlert("");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [alert, showAlert]);
 
   const handleSelect = (lyric: any) => {
     setAlert("");
@@ -44,6 +58,7 @@ export default function LyricsList({
       selectedLyrics.some((curr: any) => curr.id === lyric.id)
     ) {
       setAlert("Cannot select same lyric twice");
+      setShowAlert(true);
       return;
     }
 
@@ -54,6 +69,7 @@ export default function LyricsList({
     } else {
       setSelectedLyrics([lyric]);
       setAlert("Please select up to 5 contiguous lyrics");
+      setShowAlert(true);
     }
   };
 
@@ -63,8 +79,23 @@ export default function LyricsList({
     }
   };
 
-  if (lyrics?.length === 0) {
-    return <div className="text-gray-500">Loading...</div>;
+  const dismissAlert = () => {
+    setShowAlert(false);
+    setAlert("");
+  };
+
+  // Show skeleton when lyrics is undefined or empty
+  if (!lyrics || lyrics.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-4 w-full max-w-2xl p-4">
+        {[...Array(10)].map((_, index) => (
+          <div key={index} className="w-full">
+            <div className="h-6 bg-gray-700/50 rounded animate-pulse mb-2"></div>
+            <div className="h-4 bg-gray-600/30 rounded animate-pulse w-3/4"></div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (lyrics === null) {
@@ -102,8 +133,24 @@ export default function LyricsList({
 
   return (
     <>
-      {selectedLyrics.length > 0 && <p>{alert}</p>}
-      {lyrics && (
+      {/* Alert Box - positioned at bottom of page */}
+      {showAlert && alert && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-sm">
+            <div className="flex-1">
+              <p className="text-sm font-medium">{alert}</p>
+            </div>
+            <button
+              onClick={dismissAlert}
+              className="text-white/80 hover:text-white transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {lyrics && lyrics.length > 0 && (
         <div
           className="flex flex-col items-center text-center"
           onScroll={handleScroll}

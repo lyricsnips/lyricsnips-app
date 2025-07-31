@@ -13,7 +13,7 @@ export default function Home() {
     <div className="h-full flex flex-col">
       <Title />
       <div className="w-full flex justify-center flex-1 overflow-hidden">
-        <div className="ml-8 mr-8 w-full max-w-4xl flex flex-col">
+        <div className="ml-3 mr-3 w-full max-w-4xl flex flex-col">
           <SearchBar />
           <div className="flex-1 overflow-y-auto">
             {currentTab === "search" && <ResultsList />}

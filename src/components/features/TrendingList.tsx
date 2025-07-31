@@ -37,6 +37,7 @@ export default function TrendingList() {
       cleanResults.forEach(async (song: any) => {
         try {
           const lyrics = await getSharedLyrics(song.videoId);
+
           const updatedSong =
             Array.isArray(lyrics.data) && lyrics.data.length > 0
               ? { ...song, lyrics: lyrics.data }
@@ -66,7 +67,7 @@ export default function TrendingList() {
 
   return (
     <>
-      <ul className="flex flex-col gap-5">
+      <ul className="flex flex-col gap-4">
         {trendingResults.map((song: any) => {
           return (
             <li key={song.videoId}>

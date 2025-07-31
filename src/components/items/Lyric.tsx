@@ -21,20 +21,14 @@ export default function Lyric({
     <div
       className={`${golos.className} 
         
-        ${
-          active && selected
-            ? "bg-white text-black border-1 text-3xl"
-            : "text-gray-500"
-        }
+        ${active && selected ? "bg-white text-black border-1" : "text-gray-500"}
 
-        ${!selected && active ? "text-white text-3xl" : "text-gray-500"}  ${
-        selected && !active
-          ? "bg-gray-1000 text-white border text-3xl"
-          : "text-gray-500"
+        ${!selected && active ? "text-white" : "text-gray-500"}  ${
+        selected && !active ? "bg-gray-1000 text-white border" : "text-gray-500"
       }
         cursor-pointer
         p-2
-        text-2xl
+        text-xl
         `}
       onClick={() => {
         if (isSelecting) {

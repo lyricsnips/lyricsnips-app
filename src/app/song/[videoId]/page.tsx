@@ -7,12 +7,13 @@ import {
   Pause,
   RotateCcw,
   TextSelectIcon,
+  Pointer,
+  PointerOff,
   Sparkle,
 } from "lucide-react";
 import { defaultButtonStyle, closeButtonStyle } from "@/styles/Buttons";
 import { useRef, useEffect, use, useState, useCallback } from "react";
 import YoutubePlayer from "youtube-player";
-import Player from "@/components/items/Player";
 import LyricsList from "@/components/items/LyricsList";
 import ShareModal from "@/components/features/ShareModal";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
@@ -81,6 +82,7 @@ export default function SongPage({ params }: { params: any }) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isAsking, setAsking] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   // Auto-scroll hook
   const { handleUserScroll } = useAutoScroll(currentLyric);
@@ -88,6 +90,7 @@ export default function SongPage({ params }: { params: any }) {
   // Effect 1: Fetch lyrics and set up YouTube player when videoId changes
   useEffect(() => {
     setSelectedLyrics([]);
+    setIsLoading(true); // Set loading to true when starting
 
     // Get song information
     const getSongInfo = async () => {
@@ -126,6 +129,7 @@ export default function SongPage({ params }: { params: any }) {
           setIsPlaying(state.data === 1); // 1 = playing
         });
       }
+      setIsLoading(false); // Set loading to false when done
     };
 
     fetchLyricsAndSetupPlayer();
@@ -210,6 +214,14 @@ export default function SongPage({ params }: { params: any }) {
     setIsSelecting(!isSelecting);
   };
 
+  // Skeleton component for title and author
+  const TitleSkeleton = () => (
+    <div className="w-full flex flex-col items-center gap-3">
+      <div className="h-8 bg-gray-700/50 rounded animate-pulse w-3/4"></div>
+      <div className="h-6 bg-gray-600/30 rounded animate-pulse w-1/2"></div>
+    </div>
+  );
+
   return (
     <>
       {showShareModal && (
@@ -219,65 +231,94 @@ export default function SongPage({ params }: { params: any }) {
         />
       )}
       <div className="h-full flex flex-col">
-        <div className="flex border-b-1 overflow-hidden items-center justify-center h-40">
-          {/* Background Player - scaled up and cropped */}
-          <div className="pointer-events-none">
-            <div className="opacity-50 grayscale blur-sm scale-1000">
-              <Player playerRef={playerRef}></Player>
-            </div>
+        <div className="flex border-b-1 overflow-hidden items-center justify-center h-fit p-2 relative">
+          {/* Background Player - positioned absolutely and centered */}
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <div
+              className="opacity-50 grayscale blur-sm scale-300"
+              ref={playerRef}
+            ></div>
           </div>
 
-          {/* Foreground content */}
-          <div className="absolute z-10">
-            <h2
-              className={`text-center ${gothic.className} text-2xl text-white`}
-            >
-              {songInfo.title}
-            </h2>
-            <h3
-              className={`text-center ${gothic.className} text-1xl text-gray-300`}
-            >
-              {songInfo.author}
-            </h3>
-
-            {/* Player Controls */}
-            <div className="flex gap-2 justify-center mt-4">
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={handlePlayPause}
-                  className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors"
-                >
-                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-                </button>
-                <span> {isPlaying ? "Pause" : "Play"}</span>
-              </div>
-              <div className="flex flex-col items-center">
+          {/* Foreground content - positioned relatively */}
+          <div className="relative z-10 flex flex-col justify-center items-center gap-3">
+            <div className="w-full">
+              {isLoading ? (
+                <TitleSkeleton />
+              ) : (
+                <>
+                  <h2
+                    className={`text-center ${gothic.className} text-2xl text-white`}
+                  >
+                    {songInfo.title}
+                  </h2>
+                  <h3
+                    className={`text-center ${gothic.className} text-1xl text-gray-300`}
+                  >
+                    {songInfo.author}
+                  </h3>
+                </>
+              )}
+            </div>
+            {/* Controls Container */}
+            <div className="flex flex-row items-center">
+              {/* Restart Control */}
+              <div className="flex flex-col items-center gap-2">
                 <button
                   onClick={handleRestart}
-                  className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors"
+                  className="bg-white/10 backdrop-blur-sm rounded-full p-3 hover:bg-white/20 transition-all duration-200 hover:scale-105"
+                  title="Restart song"
                 >
-                  <RotateCcw size={20} />
+                  <RotateCcw size={18} />
                 </button>
-                <span>Replay</span>
+                <span className="text-xs text-gray-400 w-16 text-center">
+                  Restart
+                </span>
               </div>
-              <div className="flex flex-col items-center">
+
+              {/* Play/Pause Control */}
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={handlePlayPause}
+                  className="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 transition-all duration-200 hover:scale-105"
+                  title={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                </button>
+                <span className="text-xs text-gray-400 w-16 text-center">
+                  {isPlaying ? "Pause" : "Play"}
+                </span>
+              </div>
+
+              {/* Lyric Selection Control */}
+              <div className="flex flex-col items-center gap-2">
                 <button
                   onClick={toggleNavigationMode}
-                  className="bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition-colors w-fit"
+                  className={`backdrop-blur-sm rounded-full p-3 transition-all duration-200 hover:scale-105 ${
+                    isSelecting
+                      ? "bg-red-500/20 hover:bg-red-500/30 text-red-400"
+                      : "bg-white/10 hover:bg-white/20"
+                  }`}
+                  title={
+                    isSelecting ? "Stop selecting lyrics" : "Select lyrics"
+                  }
                 >
-                  <TextSelectIcon
-                    size={20}
-                    color={isSelecting ? "#ffffff" : "#1d2327"}
-                  />
+                  {isSelecting ? (
+                    <PointerOff size={18} />
+                  ) : (
+                    <Pointer size={18} />
+                  )}
                 </button>
-                <span>{isSelecting ? "Skip to Lyric" : "Select Lyrics"}</span>
+                <span className="text-xs text-gray-400 w-16 text-center">
+                  {isSelecting ? "Stop" : "Select"}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto flex flex-col justify-start items-center gap-5 pb-20">
-          <div>
+          <div className="w-full flex justify-center">
             <LyricsList
               lyrics={lyrics}
               currentLyric={currentLyric}
@@ -286,7 +327,9 @@ export default function SongPage({ params }: { params: any }) {
               isSelecting={isSelecting}
             />
           </div>
-          <p className="text-gray-400 text-sm">Lyrics by Youtube Music</p>
+          {lyrics && lyrics.length > 0 && (
+            <p className="text-gray-400 text-sm">Lyrics by Youtube Music</p>
+          )}
         </div>
 
         {selectedLyrics.length > 0 && !isAsking && (

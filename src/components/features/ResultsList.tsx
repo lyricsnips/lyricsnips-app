@@ -11,7 +11,7 @@ export default function ResultsList() {
   };
 
   return (
-    <ul>
+    <ul className="flex flex-col gap-4">
       {results.map((song: any) => {
         return (
           <li key={song.videoId}>

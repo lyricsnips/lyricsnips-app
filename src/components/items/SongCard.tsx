@@ -1,5 +1,6 @@
 import LyricCard from "./LyricCard";
-import { Play } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 interface Song {
   videoId: string;
@@ -20,6 +21,8 @@ export default function SongCard({
   song: Song;
   handlePlay: (videoId: string) => void;
 }) {
+  const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
+
   const thumbnail =
     song.thumbnails && Array.isArray(song.thumbnails)
       ? song.thumbnails[song.thumbnails.length - 1]?.url
@@ -32,31 +35,86 @@ export default function SongCard({
   } else {
     artistNames = song.artists;
   }
+
+  const lyrics: any = song.lyrics || [];
+  const totalLyrics = lyrics.length;
+
+  const nextLyric = () => {
+    setCurrentLyricIndex((prev) => (prev + 1) % totalLyrics);
+  };
+
+  const prevLyric = () => {
+    setCurrentLyricIndex((prev) => (prev - 1 + totalLyrics) % totalLyrics);
+  };
+
   return (
-    <div className="border-b-1">
-      <div className="overflow-hidden whitespace-nowrap w-full">
-        <ul className="inline-flex animate-scroll list-none m-0 p-0">
-          {song.lyrics &&
-            song.lyrics.length !== 0 &&
-            song.lyrics.map((lyricInfo: any) => {
-              return (
-                <li key={lyricInfo.id} className="flex-shrink-0 mr-4">
-                  <LyricCard lyricInfo={lyricInfo} />
-                </li>
-              );
-            })}
-          {song.lyrics &&
-            song.lyrics.length !== 0 &&
-            song.lyrics.map((lyricInfo: any) => {
-              return (
-                <li key={lyricInfo.id} className="flex-shrink-0 mr-4">
-                  <LyricCard lyricInfo={lyricInfo} />
-                </li>
-              );
-            })}
-        </ul>
-      </div>
-      <div className="flex items-center gap-4 p-4">
+    <div className="border flex flex-col items-center justify-center">
+      {/* Lyrics container */}
+      {totalLyrics > 0 && (
+        <div className="relative w-full">
+          <div className="overflow-hidden">
+            <div className="flex transition-transform duration-300 ease-in-out">
+              <div className="w-full flex-shrink-0">
+                {lyrics[currentLyricIndex] && (
+                  <div className="flex flex-col gap-1 p-5 justify-center items-center bg-white">
+                    <div key={lyrics[currentLyricIndex].id}>
+                      <div className="flex flex-col">
+                        {lyrics[currentLyricIndex].lyricsJson.map(
+                          (lyricObject: any) => {
+                            return (
+                              <span key={lyricObject.id} className="text-black">
+                                {lyricObject.text}
+                              </span>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+                    <p className=" text-sm  text-gray-500 w-full text-black text-center">
+                      Shared by:{" "}
+                      {lyrics[currentLyricIndex].username || "Anonymous"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {totalLyrics > 1 && (
+            <>
+              <button
+                onClick={prevLyric}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+                aria-label="Previous lyric"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={nextLyric}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+                aria-label="Next lyric"
+              >
+                <ChevronRight size={20} />
+              </button>
+
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+                {lyrics.map((_: any, index: any) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentLyricIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentLyricIndex ? "bg-black" : "bg-black/50"
+                    }`}
+                    aria-label={`Go to lyric ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center gap-4 p-4 w-full">
         <img
           src={thumbnail}
           alt={song.title}
