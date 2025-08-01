@@ -70,7 +70,7 @@ export default function SongCard({
                         )}
                       </div>
                     </div>
-                    <p className=" text-sm  text-gray-500 w-full text-black text-center">
+                    <p className="text-sm mt-2  text-gray-500 w-full text-black text-center">
                       Shared by:{" "}
                       {lyrics[currentLyricIndex].username || "Anonymous"}
                     </p>
@@ -96,19 +96,6 @@ export default function SongCard({
               >
                 <ChevronRight size={20} />
               </button>
-
-              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
-                {lyrics.map((_: any, index: any) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentLyricIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentLyricIndex ? "bg-black" : "bg-black/50"
-                    }`}
-                    aria-label={`Go to lyric ${index + 1}`}
-                  />
-                ))}
-              </div>
             </>
           )}
         </div>

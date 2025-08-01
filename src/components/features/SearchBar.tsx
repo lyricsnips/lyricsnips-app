@@ -5,6 +5,7 @@ import { useTabContext } from "@/contexts/CurrentTabContext";
 import { Geo } from "next/font/google";
 import { getSharedLyrics } from "@/adapters/lyricAdapter";
 import Tabs from "./Tabs";
+import { Search } from "lucide-react";
 
 const geo = Geo({
   weight: ["400"],
@@ -55,20 +56,23 @@ export default function SearchBar() {
   return (
     <>
       <div className="flex justify-center mt-3 mb-3">
-        <form onSubmit={handleSubmit} className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search song or lyric..."
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className={`${geo.className} px-3 py-1 bg-black text-white-700 font-semibold border-white border hover:bg-white hover:text-black cursor-pointer transition`}
-          >
-            Search
-          </button>
+        <form onSubmit={handleSubmit} className="relative w-full max-w-md">
+          <div className="relative">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search song or lyric..."
+              className={`w-full px-4 py-3 pr-12 border border-white bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-white focus:border-white placeholder-gray-400 ${geo.className}`}
+            />
+            <button
+              type="submit"
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-1 flex items-center gap-2   bg-black text-white border border-white hover:bg-white hover:text-black transition ${geo.className}`}
+            >
+              <Search size={16} />
+              Search
+            </button>
+          </div>
         </form>
       </div>
       <Tabs />

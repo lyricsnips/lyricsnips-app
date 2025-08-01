@@ -84,7 +84,9 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       formData.append("lyrics", JSON.stringify(selectedLyrics));
       formData.append(
         "thumbnails",
-        JSON.stringify(songInfo.thumbnail.thumbnails)
+        JSON.stringify(
+          songInfo?.thumbnail?.thumbnails || songInfo?.thumbnails || []
+        )
       );
       formData.append("title", songInfo.title);
       formData.append("author", songInfo.author);
@@ -105,7 +107,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       if (result)
         setShareData({
           ...result,
-          shareURL: `${process.env.NEXT_PUBLIC_BASE_URL}/shared/${result.id}`,
+          shareURL: `${window.location.origin}/shared/${result.id}`,
         });
       console.log("Image uploaded successfully:", result);
     } catch (error) {

@@ -3,30 +3,65 @@
 import { signIn } from "next-auth/react";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { useState } from "react";
+import { Geo } from "next/font/google";
+import { defaultButtonStyle } from "@/styles/Buttons";
+
+const geo = Geo({
+  weight: ["400"],
+});
 
 export default function LogInForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { closeModal } = useAuthModal();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    signIn("credentials", {
-      username: username,
-      password: password,
-      redirect: false,
-    });
-    setUsername("");
-    setPassword("");
-    closeModal();
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        username: username,
+        password: password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        // Handle different error cases
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid username or password");
+        } else if (result.error === "UserNotFound") {
+          setError("User not found");
+        } else {
+          setError("Login failed. Please try again.");
+        }
+      } else if (result?.ok) {
+        // Successful login
+        setUsername("");
+        setPassword("");
+        closeModal();
+      }
+    } catch (error) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Login error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className={`text-red-400 text-sm ${geo.className}`}>{error}</div>
+      )}
+
       <div>
         <label
           htmlFor="username"
-          className="block text-sm font-medium text-gray-700"
+          className={`block text-sm font-medium text-white ${geo.className}`}
         >
           Username
         </label>
@@ -34,17 +69,21 @@ export default function LogInForm() {
           type="text"
           id="username"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            setError(""); // Clear error when user starts typing
+          }}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className={`mt-1 block w-full px-3 py-2 border border-white bg-black text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-white placeholder-gray-400 ${geo.className}`}
           placeholder="Enter your username"
+          disabled={loading}
         />
       </div>
 
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className={`block text-sm font-medium text-white ${geo.className}`}
         >
           Password
         </label>
@@ -52,18 +91,23 @@ export default function LogInForm() {
           type="password"
           id="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setError(""); // Clear error when user starts typing
+          }}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className={`mt-1 block w-full px-3 py-2 border border-white bg-black text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-white placeholder-gray-400 ${geo.className}`}
           placeholder="Enter your password"
+          disabled={loading}
         />
       </div>
 
       <button
         type="submit"
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        className={`w-full ${defaultButtonStyle} ${geo.className} mt-10`}
+        disabled={loading}
       >
-        Log In
+        {loading ? "Logging In..." : "Log In"}
       </button>
     </form>
   );

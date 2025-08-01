@@ -4,6 +4,12 @@ import { signIn } from "next-auth/react";
 import { createUser } from "@/adapters/userAdapter";
 import { useState } from "react";
 import { useAuthModal } from "@/contexts/AuthModalContext";
+import { Geo } from "next/font/google";
+import { defaultButtonStyle } from "@/styles/Buttons";
+
+const geo = Geo({
+  weight: ["400"],
+});
 
 export default function SignUpForm() {
   const [username, setName] = useState("");
@@ -46,12 +52,19 @@ export default function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <div className="text-red-600">{error}</div>}
-      {success && <div className="text-green-600">{success}</div>}
+      {error && (
+        <div className={`text-red-400 text-sm ${geo.className}`}>{error}</div>
+      )}
+      {success && (
+        <div className={`text-green-400 text-sm ${geo.className}`}>
+          {success}
+        </div>
+      )}
+
       <div>
         <label
           htmlFor="username"
-          className="block text-sm font-medium text-gray-700"
+          className={`block text-sm font-medium text-white ${geo.className}`}
         >
           Username
         </label>
@@ -61,14 +74,15 @@ export default function SignUpForm() {
           value={username}
           onChange={(e) => setName(e.target.value)}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className={`mt-1 block w-full px-3 py-2 border border-white bg-black text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-white placeholder-gray-400 ${geo.className}`}
           placeholder="Enter username"
         />
       </div>
+
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className={`block text-sm font-medium text-white ${geo.className}`}
         >
           Password
         </label>
@@ -79,14 +93,15 @@ export default function SignUpForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className={`mt-1 block w-full px-3 py-2 border border-white bg-black text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-white placeholder-gray-400 ${geo.className}`}
           placeholder="Enter your password"
         />
       </div>
+
       <div>
         <label
           htmlFor="confirmPassword"
-          className="block text-sm font-medium text-gray-700"
+          className={`block text-sm font-medium text-white ${geo.className}`}
         >
           Confirm Password
         </label>
@@ -97,13 +112,14 @@ export default function SignUpForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
           minLength={6}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className={`mt-1 block w-full px-3 py-2 border border-white bg-black text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-white placeholder-gray-400 ${geo.className}`}
           placeholder="Confirm your password"
         />
       </div>
+
       <button
         type="submit"
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        className={`w-full ${defaultButtonStyle} ${geo.className} mt-10`}
         disabled={loading}
       >
         {loading ? "Signing Up..." : "Sign Up"}

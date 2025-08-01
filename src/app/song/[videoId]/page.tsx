@@ -235,14 +235,18 @@ export default function SongPage({ params }: { params: any }) {
           {/* Background Player - positioned absolutely and centered */}
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
             <div
-              className="opacity-50 grayscale blur-sm scale-300"
+              className="opacity-50 grayscale blur-lg"
+              style={{
+                width: "calc(100vw + 600px)",
+                height: "calc(100vh + 600px)",
+              }}
               ref={playerRef}
             ></div>
           </div>
 
           {/* Foreground content - positioned relatively */}
           <div className="relative z-10 flex flex-col justify-center items-center gap-3">
-            <div className="w-full">
+            <div className="w-full text-nowrap">
               {isLoading ? (
                 <TitleSkeleton />
               ) : (

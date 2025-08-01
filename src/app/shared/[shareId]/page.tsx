@@ -1,6 +1,12 @@
 import { fetchSharedLyrics } from "@/adapters/lyricAdapter";
 import { Metadata } from "next";
-import { Frown } from "lucide-react";
+import { Frown, Music, ExternalLink } from "lucide-react";
+import { Geo } from "next/font/google";
+import { defaultButtonStyle } from "@/styles/Buttons";
+
+const geo = Geo({
+  weight: ["400"],
+});
 
 export async function generateMetadata({
   params,
@@ -46,15 +52,21 @@ export default async function SharedLyricsPage({
 
   if (!sharedLyrics.data)
     return (
-      <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-10">
-        <Frown size="100" color="black" />
-        <p className="text-gray-500 mb-2">This link is no longer available</p>
-        <a
-          href={"/"}
-          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-center font-semibold hover:bg-blue-700 transition-colors"
-        >
-          Go Home
-        </a>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="max-w-xl mx-auto p-6 bg-black border border-white rounded-lg shadow-lg">
+          <div className="text-center">
+            <Frown size="100" className="text-white mx-auto mb-4" />
+            <p className={`text-gray-400 mb-4 ${geo.className}`}>
+              This link is no longer available
+            </p>
+            <a
+              href={"/"}
+              className={`inline-flex items-center gap-2 ${defaultButtonStyle} ${geo.className}`}
+            >
+              Go Home
+            </a>
+          </div>
+        </div>
       </div>
     );
 
@@ -63,31 +75,43 @@ export default async function SharedLyricsPage({
   const youtubeMusicUrl = `https://music.youtube.com/watch?v=${videoId}`;
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-10">
-      <div className="bg-gray-100 rounded p-4 mb-4">
-        <img src={sharedLyrics.data.lyricsPreviewSrc} alt="" />
-      </div>
-      <p className="text-gray-500 mb-2">
-        Shared by: {sharedLyrics.data.user?.username || "Anonymous"}
-      </p>
-      <div className="flex gap-4 mb-4">
-        <a
-          href={youtubeMusicUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md text-center font-semibold hover:bg-red-700 transition-colors"
-        >
-          Listen on YouTube Music
-        </a>
-        <a
-          href={lyricsPageUrl}
-          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-center font-semibold hover:bg-blue-700 transition-colors"
-        >
-          See on LyricSnips
-        </a>
-      </div>
-      <div className="text-xs text-gray-400">
-        This page is optimized for link previews and sharing.
+    <div className="min-h-screen">
+      <div className="max-w-xl mx-auto p-6 rounded-lg shadow-lg">
+        <div className="border border-white rounded p-4 mb-6">
+          <img
+            src={sharedLyrics.data.lyricsPreviewSrc}
+            alt="Shared lyrics preview"
+            className="w-full h-auto"
+          />
+        </div>
+
+        <p className={`text-gray-400 mb-6 ${geo.className}`}>
+          Shared by: {sharedLyrics.data.user?.username || "Anonymous"}
+        </p>
+
+        <div className="flex flex-col gap-3 mb-6">
+          <a
+            href={youtubeMusicUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2 border border-red-500 bg-black text-red-500 font-semibold hover:bg-red-500 hover:text-white transition ${geo.className}`}
+          >
+            <Music size={16} />
+            Listen on YouTube Music
+          </a>
+
+          <a
+            href={lyricsPageUrl}
+            className={`w-full flex items-center justify-center gap-2 ${defaultButtonStyle} ${geo.className}`}
+          >
+            <ExternalLink size={16} />
+            See on LyricSnips
+          </a>
+        </div>
+
+        <div className={`text-xs text-gray-500 ${geo.className}`}>
+          This page is optimized for link previews and sharing.
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSelectedLyrics } from "../../contexts/SelectedLyricsContext";
+import { defaultButtonStyle } from "@/styles/Buttons";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Lyric from "./Lyric";
@@ -84,30 +85,30 @@ export default function LyricsList({
     setAlert("");
   };
 
-  // Show skeleton when lyrics is undefined or empty
-  if (!lyrics || lyrics.length === 0) {
+  if (lyrics === null) {
     return (
-      <div className="flex flex-col items-center gap-4 w-full max-w-2xl p-4">
-        {[...Array(10)].map((_, index) => (
-          <div key={index} className="w-full">
-            <div className="h-6 bg-gray-700/50 rounded animate-pulse mb-2"></div>
-            <div className="h-4 bg-gray-600/30 rounded animate-pulse w-3/4"></div>
-          </div>
-        ))}
+      <div className="flex flex-col items-center text-center py-8">
+        <p className="text-gray-300 mb-4">No lyrics available for this song</p>
+        <button
+          onClick={() => router.push("/")}
+          className={`px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none ${defaultButtonStyle}`}
+        >
+          Find Other Songs
+        </button>
       </div>
     );
   }
 
-  if (lyrics === null) {
+  // Show skeleton when lyrics is undefined or empty
+  if (!lyrics || lyrics.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-600 mb-4">No lyrics available for this song</p>
-        <button
-          onClick={() => router.push("/")}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
-        >
-          Go Home
-        </button>
+      <div className="flex flex-col items-center  gap-10 w-full max-w-2xl p-4">
+        {[...Array(10)].map((_, index) => (
+          <div key={index} className="w-full flex flex-col items-center gap-2">
+            <div className="h-6 bg-gray-700/50 rounded animate-pulse mb-2 w-full"></div>
+            <div className="h-4 bg-gray-600/30 rounded animate-pulse w-3/4"></div>
+          </div>
+        ))}
       </div>
     );
   }

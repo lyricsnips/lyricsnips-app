@@ -4,6 +4,17 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { deleteShare, getShares } from "@/adapters/sharesAdapter";
+import { Special_Gothic_Expanded_One, Geo } from "next/font/google";
+import { defaultButtonStyle } from "@/styles/Buttons";
+import { Copy, Trash2, Eye } from "lucide-react";
+
+const gothic = Special_Gothic_Expanded_One({
+  weight: ["400"],
+});
+
+const geo = Geo({
+  weight: ["400"],
+});
 
 interface SharedLyric {
   id: string;
@@ -58,7 +69,7 @@ export default function SharesPage() {
   const handleCopyLink = async (shareId: string) => {
     try {
       // Create the share URL
-      const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/shared/${shareId}`;
+      const shareUrl = `${window.location.origin}/shared/${shareId}`;
 
       // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);
@@ -82,27 +93,16 @@ export default function SharesPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your shared lyrics...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (status === "unauthenticated") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-gray-600">
+          <p className="text-white mb-4">
             You must have an account to see shared lyrics
           </p>
           <button
             onClick={() => router.push("/")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+            className={`${defaultButtonStyle} ${geo.className}`}
           >
             Go Home
           </button>
@@ -111,16 +111,46 @@ export default function SharesPage() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen ">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="bg-black border border-white rounded-lg shadow-md overflow-hidden"
+              >
+                {/* Image skeleton */}
+                <div className="w-full h-48 bg-gray-700/50 rounded animate-pulse"></div>
+
+                <div className="p-4">
+                  {/* Date skeleton */}
+                  <div className="h-4 bg-gray-600/30 rounded animate-pulse mb-4"></div>
+
+                  {/* Button skeletons */}
+                  <div className="space-y-2">
+                    <div className="h-10 bg-gray-700/50 rounded animate-pulse"></div>
+                    <div className="h-10 bg-gray-600/30 rounded animate-pulse"></div>
+                    <div className="h-10 bg-gray-700/50 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (shares.length === 0 && status === "authenticated") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen ">
         <div className="text-center max-w-md mx-auto p-6">
-          <p className="text-gray-600 mb-4">
-            You haven't shared any lyrics yet!
-          </p>
+          <p className="text-white mb-4">You haven't shared any lyrics yet!</p>
           <button
             onClick={() => router.push("/")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+            className={`${defaultButtonStyle} ${geo.className}`}
           >
             Find Songs
           </button>
@@ -130,9 +160,11 @@ export default function SharesPage() {
   }
 
   return (
-    <div className="min-h-scree">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6 text-white-800">
+        <h1
+          className={`text-2xl font-bold mb-6 text-white ${gothic.className}`}
+        >
           Your Shared Lyrics
         </h1>
 
@@ -141,7 +173,7 @@ export default function SharesPage() {
             {shares.map((share) => (
               <div
                 key={share.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-black border border-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <img
                   src={share.lyrics_preview_src}
@@ -149,31 +181,41 @@ export default function SharesPage() {
                   className="w-full h-fit"
                 />
                 <div className="p-4">
-                  <p className="text-sm text-gray-500">
+                  <p className={`text-sm text-gray-400 ${geo.className}`}>
                     Shared on {new Date(share.createdAt).toLocaleDateString()}
                   </p>
-                  <button
-                    onClick={() => router.push(`/shared/${share.id}`)}
-                    className="mt-2 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
-                  >
-                    View Snippet
-                  </button>
-                  <button
-                    onClick={() => handleCopyLink(share.id)}
-                    className={`mt-2 w-full px-4 py-2 rounded-md focus:outline-none transition-colors ${
-                      copiedId === share.id
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-600 text-white hover:bg-gray-700"
-                    }`}
-                  >
-                    {copiedId === share.id ? "Copied!" : "Copy Link"}
-                  </button>
-                  <button
-                    onClick={() => handleRemove(share.id)}
-                    className="mt-2 w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
-                  >
-                    Remove Share
-                  </button>
+
+                  <div className="flex flex-col gap-2 mt-4">
+                    <button
+                      onClick={() => router.push(`/shared/${share.id}`)}
+                      className={`w-full flex items-center justify-center gap-2 ${defaultButtonStyle} ${geo.className}`}
+                    >
+                      <Eye size={16} />
+                      View Snippet
+                    </button>
+
+                    <button
+                      onClick={() => handleCopyLink(share.id)}
+                      className={`w-full flex items-center justify-center gap-2 px-4 py-2 border border-white font-semibold transition ${
+                        geo.className
+                      } ${
+                        copiedId === share.id
+                          ? "bg-green-600 text-white border-green-600"
+                          : "bg-black text-white border-white hover:bg-white hover:text-black"
+                      }`}
+                    >
+                      <Copy size={16} />
+                      {copiedId === share.id ? "Copied!" : "Copy Link"}
+                    </button>
+
+                    <button
+                      onClick={() => handleRemove(share.id)}
+                      className={`w-full flex items-center justify-center gap-2 px-4 py-2 border border-red-500 bg-black text-red-500 font-semibold hover:bg-red-500 hover:text-white transition ${geo.className}`}
+                    >
+                      <Trash2 size={16} />
+                      Remove Share
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
