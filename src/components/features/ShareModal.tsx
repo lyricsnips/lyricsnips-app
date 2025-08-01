@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import * as htmlToImage from "html-to-image";
+import { useRef, useState } from "react";
+import html2canvas from "html2canvas";
 import { useSession } from "next-auth/react";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import CustomizeMenu, { CustomizeSettings } from "../menus/CustomizeMenu";
 import { Special_Gothic_Expanded_One, Geo } from "next/font/google";
+import LyriCard from "../items/LyricCard";
+import { defaultButtonStyle } from "@/styles/Buttons";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
@@ -40,7 +42,6 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
   const [settings, setSettings] = useState<CustomizeSettings>({
     backgroundColor: CARD_CONFIG.backgroundColor,
     fontFamily: "Inter, Arial, sans-serif",
-    fontSize: `${CARD_CONFIG.lyricFontSize}px`,
     textColor: CARD_CONFIG.textColor,
   });
 
@@ -48,15 +49,28 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
     console.log(`Trying to share song ${songInfo.title}`);
     if (!lyricCardRef.current) return;
 
-    // Convert element (div) to PNG and download
+    // Convert element (div) to PNG using html2canvas
     try {
-      const blob = await htmlToImage.toBlob(lyricCardRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
-        backgroundColor: settings.backgroundColor,
-        skipFonts: true,
-        width: CARD_CONFIG.width,
-        height: CARD_CONFIG.height,
+      // Pre-load fonts before conversion
+      await document.fonts.ready;
+
+      const canvas = await html2canvas(lyricCardRef.current, {
+        background: settings.backgroundColor,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      });
+
+      // Convert canvas to blob
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else throw new Error("Failed to generate blob");
+          },
+          "image/png",
+          1.0
+        );
       });
 
       if (!blob) {
@@ -66,15 +80,15 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       // Create FormData to send to backend
       const formData = new FormData();
       formData.append("image", blob, "component-image.png");
-      formData.append("videoId", songInfo.videoId); // videoId
-      formData.append("lyrics", JSON.stringify(selectedLyrics)); // Convert array to JSON string
+      formData.append("videoId", songInfo.videoId);
+      formData.append("lyrics", JSON.stringify(selectedLyrics));
       formData.append(
         "thumbnails",
         JSON.stringify(songInfo.thumbnail.thumbnails)
       );
       formData.append("title", songInfo.title);
       formData.append("author", songInfo.author);
-      formData.append("filename", `image-${Date.now()}.png`); // Custom filename
+      formData.append("filename", `image-${Date.now()}.png`);
 
       // Upload to S3 and return link to image
       const response = await fetch("/api/upload-lyric", {
@@ -96,8 +110,6 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       console.log("Image uploaded successfully:", result);
     } catch (error) {
       console.error("Error generating image:", error);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -128,157 +140,50 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
     }
   };
 
-  // Calculate font size based on text length and settings
-  const getFontSize = (textLength: number, baseSize?: string) => {
-    // Parse the base font size from settings (remove 'px' and convert to number)
-    const baseFontSize = baseSize
-      ? parseInt(baseSize.replace("px", ""))
-      : CARD_CONFIG.lyricFontSize;
-
-    // For lyrics, always use the base font size from settings
-    // Only adjust for very short or very long text
-    if (textLength < 50) return Math.max(baseFontSize * 1.2, 36); // Short text slightly larger
-    if (textLength > 500) return Math.max(baseFontSize * 0.8, 20); // Very long text smaller
-    return baseFontSize; // Most lyrics use the base size from settings
-  };
-
-  // Parse font size from settings for consistent scaling
-  const parseFontSize = (fontSize: string) => {
-    return parseInt(fontSize.replace("px", ""));
-  };
-
-  const baseFontSize = parseFontSize(settings.fontSize);
-
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="rounded-xl p-6 max-w-lg w-full bg-white shadow-2xl">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-light transition-colors"
-        >
-          ×
-        </button>
-
-        <h2 className="text-xl font-bold mb-6 text-gray-800">Share Lyrics</h2>
-
-        {/* Preview container with fixed dimensions */}
-        <div className="mb-4 flex justify-center">
-          <div
-            className="relative overflow-hidden rounded-lg shadow-lg"
-            style={{
-              width: `${CARD_CONFIG.width / 2.5}px`, // Increased preview size
-              height: `${CARD_CONFIG.height / 2.5}px`,
-            }}
+      <div className="border p-6 max-w-lg w-full bg-black shadow-2xl">
+        <div className="flex justify-between">
+          <h2 className={`text-xl font-bold ${gothic.className}  text-white`}>
+            Share Lyric
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className=" text-gray-400 hover:text-gray-600 text-2xl font-light transition-colors"
           >
-            <div
-              className="w-full h-full p-4 flex flex-col justify-between"
-              style={{
-                background: settings.backgroundColor, // Use dynamic background color
-                fontFamily: settings.fontFamily,
-                color: settings.textColor,
-              }}
-              ref={lyricCardRef}
-            >
-              {/* Lyrics content */}
-              <div className="flex-1 flex flex-col justify-center">
-                <div className="text-center space-y-2">
-                  {selectedLyrics
-                    .slice(0, 3)
-                    .map((lyric: any, index: number) => {
-                      const fontSize = getFontSize(
-                        lyric.text.length,
-                        settings.fontSize
-                      );
-                      return (
-                        <p
-                          key={index}
-                          style={{
-                            fontSize: `${fontSize / 2}px`, // Scale down for preview
-                            lineHeight: 1.2,
-                            fontWeight: "500",
-                            color: settings.textColor, // Ensure text color is applied
-                          }}
-                          className="leading-tight"
-                        >
-                          {lyric.text}
-                        </p>
-                      );
-                    })}
-                  {selectedLyrics.length > 3 && (
-                    <p
-                      style={{
-                        fontSize: `${baseFontSize / 2.5}px`,
-                        opacity: 0.8,
-                        color: settings.textColor,
-                      }}
-                    >
-                      ...
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Song info footer */}
-              <div className="flex items-center gap-3 mt-4 bg-black p-2">
-                {/* Album cover */}
-                {songInfo.thumbnail &&
-                  Array.isArray(songInfo.thumbnail.thumbnails) && (
-                    <img
-                      src={
-                        songInfo.thumbnail.thumbnails[
-                          songInfo.thumbnail.thumbnails.length - 1
-                        ].url ?? "Missing picture here"
-                      }
-                      alt="Cover image"
-                      className="w-10 h-10 object-cover" // Slightly larger
-                    />
-                  )}
-
-                <div className="flex-1 min-w-0">
-                  {/* Song title */}
-                  <p
-                    className={`truncate text-xl ${gothic.className} text-white`}
-                  >
-                    {songInfo.title}
-                  </p>
-                  {/* Artist name */}
-                  <p className="truncate text-xs font-sans ">
-                    {songInfo.author}
-                  </p>
-                </div>
-
-                {/* Brand */}
-                <div
-                  className={`text-xs px-2 py-1 bg-opacity-20 text-white ${gothic.className}`}
-                >
-                  LyricSnips
-                </div>
-              </div>
-            </div>
-          </div>
+            ×
+          </button>
         </div>
 
-        <CustomizeMenu settings={settings} setSettings={setSettings} />
+        {/* Preview container with fixed dimensions */}
+        <div className="flex justify-center m-4 pointer-events-none select-none">
+          <LyriCard
+            songInfo={songInfo}
+            settings={settings}
+            lyricCardRef={lyricCardRef}
+          />
+        </div>
 
         {!shareData && (
-          <button
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors font-medium"
-            onClick={handleShare}
-          >
-            Save and Share
-          </button>
+          <CustomizeMenu settings={settings} setSettings={setSettings} />
+        )}
+
+        {!shareData && (
+          <div className="flex justify-center w-full">
+            <button className={defaultButtonStyle} onClick={handleShare}>
+              Save and Share
+            </button>
+          </div>
         )}
 
         {/* URL input and copy button */}
         {shareData && (
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Share this link:
-            </label>
+          <div>
+            <span>Share this link:</span>
             <div className="flex gap-3">
               <input
                 type="text"
@@ -286,14 +191,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
                 readOnly
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <button
-                onClick={handleCopy}
-                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  copied
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
-                }`}
-              >
+              <button onClick={handleCopy} className={` ${defaultButtonStyle}`}>
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>

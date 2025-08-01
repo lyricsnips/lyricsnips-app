@@ -146,7 +146,7 @@ export default function SharesPage() {
                 <img
                   src={share.lyrics_preview_src}
                   alt="Lyrics preview"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-fit"
                 />
                 <div className="p-4">
                   <p className="text-sm text-gray-500">

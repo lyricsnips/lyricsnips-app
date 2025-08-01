@@ -96,7 +96,7 @@ export default function SongPage({ params }: { params: any }) {
     const getSongInfo = async () => {
       const res = await getSong(videoId);
       if (res.data) {
-        setSongInfo(res.data.videoDetails);
+        setSongInfo(res.data);
       }
     };
 
@@ -250,12 +250,12 @@ export default function SongPage({ params }: { params: any }) {
                   <h2
                     className={`text-center ${gothic.className} text-2xl text-white`}
                   >
-                    {songInfo.title}
+                    {songInfo?.title ?? "Unknown"}
                   </h2>
                   <h3
                     className={`text-center ${gothic.className} text-1xl text-gray-300`}
                   >
-                    {songInfo.author}
+                    {songInfo?.author ?? "Unknown"}
                   </h3>
                 </>
               )}

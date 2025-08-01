@@ -33,7 +33,7 @@ model Share {
 
 model CachedSong {
   id          String   @id @default(cuid())
-  videoId     String  
+  videoId     String   @unique
   thumbnails  Json[]
   title       String
   author      String

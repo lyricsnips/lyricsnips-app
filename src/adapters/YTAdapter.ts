@@ -32,10 +32,36 @@ export async function getLyrics(videoId: string) {
 
 export async function getSong(videoId: string) {
   try {
+    // Try getting from database
+    interface CacheResponse {
+      data?: {
+        videoId: string;
+        thumbnails: any[];
+        title: string;
+        author: string;
+        // ... other properties
+      };
+    }
+
+    try {
+      const cache = await fetcher<CacheResponse>(`/api/cache/${videoId}`, {
+        method: "GET",
+      });
+
+      if (cache.data) {
+        console.log(`Song found in cache:`, cache.data);
+        return { data: cache.data, error: null };
+      }
+    } catch (error) {
+      console.error("Failed to fetch from cache:", error);
+      // Continue to YouTube API fallback
+    }
+
+    // Fallback to Youtube API
     const res = await fetcher<{ data?: any }>(`${baseUrl}${videoId}`, {
       method: "GET",
     });
-    return { data: res.data, error: null };
+    return { data: res.data.videoDetails, error: null };
   } catch (e: any) {
     return { data: null, error: e.message || "Unknown error" };
   }

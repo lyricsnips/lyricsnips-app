@@ -10,6 +10,10 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
+    console.log("Session:", session);
+    console.log("User ID:", userId);
+    console.log("User ID type:", typeof userId);
+
     const formData = await req.formData();
     const imageFile = formData.get("image") as File;
     const videoId = formData.get("videoId") as string;
@@ -35,13 +39,15 @@ export async function POST(req: NextRequest) {
     const imageUrl = await uploadToS3({ buffer, key });
 
     // Store in database
+    const shareData = {
+      userId: userId || null,
+      videoId: videoId,
+      lyrics_preview_src: imageUrl,
+      lyricsJson: JSON.parse(lyrics),
+    };
+
     const image = await prisma.share.create({
-      data: {
-        userId: userId,
-        videoId: videoId,
-        lyrics_preview_src: imageUrl,
-        lyricsJson: JSON.parse(lyrics),
-      },
+      data: shareData,
       select: {
         id: true,
         videoId: true,
@@ -50,14 +56,29 @@ export async function POST(req: NextRequest) {
     });
 
     // Store in cache for trending tab to fetch in the future
-    await prisma.cachedSong.create({
-      data: {
-        videoId,
-        thumbnails: JSON.parse(thumbnailsRaw),
-        title,
-        author,
-      },
-    });
+    try {
+      await prisma.cachedSong.upsert({
+        where: {
+          videoId: videoId,
+        },
+        update: {
+          title: title,
+          author: author,
+          thumbnails: JSON.parse(thumbnailsRaw),
+          updatedAt: new Date(),
+        },
+        create: {
+          videoId: videoId,
+          title: title,
+          author: author,
+          thumbnails: JSON.parse(thumbnailsRaw),
+        },
+      });
+    } catch (error) {
+      // Log the error but don't fail the upload
+      console.log("Failed to cache song data:", error);
+      // Continue with the upload process
+    }
 
     return NextResponse.json({ ...image });
   } catch (e) {

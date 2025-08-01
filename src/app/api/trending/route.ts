@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     // First, get the trending videoIds with their counts
-    const trendingCounts = await prisma.cachedSong.groupBy({
+    const trendingCounts = await prisma.share.groupBy({
       by: ["videoId"],
       _count: {
         videoId: true,

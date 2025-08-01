@@ -1,6 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import {
+  Special_Gothic_Expanded_One,
+  UnifrakturMaguntia,
+  Pirata_One,
+  Cal_Sans,
+  Schoolbell,
+} from "next/font/google";
+
+const gothic = Special_Gothic_Expanded_One({
+  weight: ["400"],
+});
+
+const unifraktur = UnifrakturMaguntia({
+  weight: ["400"],
+  subsets: ["latin"],
+});
+
+const pirataOne = Pirata_One({
+  weight: ["400"],
+  subsets: ["latin"],
+});
+
+const calSans = Cal_Sans({
+  weight: ["400"],
+  subsets: ["latin"],
+});
+
+const schoolbell = Schoolbell({
+  weight: ["400"],
+  subsets: ["latin"],
+});
 
 interface CustomizeMenuProps {
   settings: CustomizeSettings;
@@ -10,22 +40,22 @@ interface CustomizeMenuProps {
 export interface CustomizeSettings {
   backgroundColor: string;
   fontFamily: string;
-  fontSize: string;
   textColor: string;
 }
 
 const backgroundColors = [
-  { name: "Black", value: "#000000" },
-  { name: "White", value: "#ffffff" },
-  { name: "Soft Gray", value: "#f8f9fa" },
-  { name: "Pastel Blue", value: "#e3f2fd" },
-  { name: "Pastel Green", value: "#e8f5e8" },
-  { name: "Pastel Purple", value: "#f3e5f5" },
-  { name: "Pastel Pink", value: "#fce4ec" },
-  { name: "Pastel Orange", value: "#fff3e0" },
-  { name: "Pastel Yellow", value: "#fffde7" },
-  { name: "Pastel Red", value: "#ffebee" },
-  { name: "Pastel Teal", value: "#e0f2f1" },
+  { name: "Dark Mode", value: "#0f0f0f" },
+  { name: "Light Mode", value: "#ffffff" },
+  { name: "Sage Green", value: "#9ca3af" },
+  { name: "Dusty Rose", value: "#f3e8ff" },
+  { name: "Mint", value: "#ecfdf5" },
+  { name: "Lavender", value: "#faf5ff" },
+  { name: "Cream", value: "#fefce8" },
+  { name: "Slate", value: "#f1f5f9" },
+  { name: "Warm Gray", value: "#f8fafc" },
+  { name: "Soft Blue", value: "#eff6ff" },
+  { name: "Peach", value: "#fef2f2" },
+  { name: "Taupe", value: "#f5f5f4" },
 ];
 
 const fontFamilies = [
@@ -35,26 +65,24 @@ const fontFamilies = [
   { name: "Georgia", value: "Georgia, serif" },
   { name: "Verdana", value: "Verdana, sans-serif" },
   { name: "Impact", value: "Impact, sans-serif" },
-];
-
-const fontSizes = [
-  { name: "S", value: "16px" },
-  { name: "M", value: "18px" },
-  { name: "L", value: "24px" },
-  { name: "XL", value: "32px" },
+  { name: "Special Gothic", value: gothic.style.fontFamily },
+  { name: "Unifraktur Maguntia", value: unifraktur.style.fontFamily },
+  { name: "Pirata One", value: pirataOne.style.fontFamily },
+  { name: "Cal Sans", value: calSans.style.fontFamily },
+  { name: "Schoolbell", value: schoolbell.style.fontFamily },
 ];
 
 const textColors = [
-  { name: "White", value: "#ffffff" },
-  { name: "Dark Gray", value: "#424242" },
-  { name: "Medium Gray", value: "#757575" },
-  { name: "Blue Gray", value: "#546e7a" },
-  { name: "Forest Green", value: "#2e7d32" },
-  { name: "Deep Purple", value: "#6a1b9a" },
-  { name: "Rose Pink", value: "#c2185b" },
-  { name: "Deep Orange", value: "#d84315" },
-  { name: "Amber", value: "#f57c00" },
-  { name: "Teal", value: "#00695c" },
+  { name: "Pure White", value: "#ffffff" },
+  { name: "Charcoal", value: "#1f2937" },
+  { name: "Slate Gray", value: "#64748b" },
+  { name: "Forest Green", value: "#059669" },
+  { name: "Navy Blue", value: "#1e40af" },
+  { name: "Burgundy", value: "#991b1b" },
+  { name: "Olive", value: "#65a30d" },
+  { name: "Teal", value: "#0d9488" },
+  { name: "Purple", value: "#7c3aed" },
+  { name: "Rose", value: "#be185d" },
 ];
 
 export default function CustomizeMenu({
@@ -67,84 +95,35 @@ export default function CustomizeMenu({
   };
 
   return (
-    <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-      <div className="space-y-3">
-        {/* Background Color */}
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Background
-          </label>
-          <div className="flex gap-1">
-            {backgroundColors.map((color) => (
-              <button
-                key={color.value}
-                onClick={() =>
-                  handleSettingChange("backgroundColor", color.value)
-                }
-                className={`w-6 h-6 rounded border ${
-                  settings.backgroundColor === color.value
-                    ? "border-blue-500 scale-110"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
-                style={{ backgroundColor: color.value }}
-                title={color.name}
-              />
-            ))}
-          </div>
-        </div>
-
+    <div className="mb-4 p-3  border border-gray-200 shadow-sm">
+      <div className="grid grid-cols-3 gap-3">
         {/* Font Settings */}
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Font
-            </label>
-            <select
-              value={settings.fontFamily}
-              onChange={(e) =>
-                handleSettingChange("fontFamily", e.target.value)
-              }
-              className="w-full p-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-            >
-              {fontFamilies.map((font) => (
-                <option key={font.value} value={font.value}>
-                  {font.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Size
-            </label>
-            <select
-              value={settings.fontSize}
-              onChange={(e) => handleSettingChange("fontSize", e.target.value)}
-              className="w-full p-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-            >
-              {fontSizes.map((size) => (
-                <option key={size.value} value={size.value}>
-                  {size.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Font</label>
+          <select
+            value={settings.fontFamily}
+            onChange={(e) => handleSettingChange("fontFamily", e.target.value)}
+            className="w-full p-1 text-xs text-black border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
+          >
+            {fontFamilies.map((font) => (
+              <option key={font.value} value={font.value}>
+                {font.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Text Color */}
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Text Color
-          </label>
-          <div className="flex gap-1">
-            {textColors.map((color) => (
+          <label className="block text-sm font-medium  mb-1">Text Color</label>
+          <div className="flex gap-1 flex-wrap">
+            {textColors.slice(0, 6).map((color) => (
               <button
                 key={color.value}
                 onClick={() => handleSettingChange("textColor", color.value)}
-                className={`w-6 h-6 rounded border flex items-center justify-center ${
+                className={`w-6 h-6 border flex items-center justify-center transition-all duration-200 hover:scale-105 ${
                   settings.textColor === color.value
-                    ? "border-blue-500 scale-110"
+                    ? "border-gray-500 scale-110 shadow-md"
                     : "border-gray-300 hover:border-gray-400"
                 }`}
                 style={{ backgroundColor: color.value }}
@@ -153,15 +132,34 @@ export default function CustomizeMenu({
                 <span
                   className="text-xs font-bold"
                   style={{
-                    color:
-                      color.value === "#424242" || color.value === "#546e7a"
-                        ? "#ffffff"
-                        : "#ffffff",
+                    color: color.value === "#ffffff" ? "#000000" : "#ffffff",
                   }}
                 >
                   A
                 </span>
               </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Background */}
+        <div>
+          <label className="block text-sm font-medium  mb-1">Background</label>
+          <div className="flex gap-1 flex-wrap">
+            {backgroundColors.slice(0, 6).map((color) => (
+              <button
+                key={color.value}
+                onClick={() =>
+                  handleSettingChange("backgroundColor", color.value)
+                }
+                className={`w-6 h-6 rounded border transition-all duration-200 hover:scale-105 ${
+                  settings.backgroundColor === color.value
+                    ? "border-gray-500 scale-110 shadow-md"
+                    : "border-gray-300 hover:border-gray-400"
+                }`}
+                style={{ backgroundColor: color.value }}
+                title={color.name}
+              />
             ))}
           </div>
         </div>
