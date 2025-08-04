@@ -1,11 +1,12 @@
 import { fetcher } from "@/lib/fetcher";
 
-const baseUrl = "http://127.0.0.1:8000/songs/";
+const baseUrl =
+  process.env.NEXT_PUBLIC_YT_MUSIC_API_URL || "http://127.0.0.1:8000/";
 
 export async function getSongs(query: string) {
   try {
     const res = await fetcher<{ data?: any }>(
-      `${baseUrl}search?query=${query}`,
+      `${baseUrl}songs/search?query=${query}`,
       {
         method: "GET",
       }
@@ -19,7 +20,7 @@ export async function getSongs(query: string) {
 export async function getLyrics(videoId: string) {
   try {
     const res = await fetcher<{ data?: any }>(
-      `${baseUrl}lyrics?video_id=${videoId}`,
+      `${baseUrl}songs/lyrics?video_id=${videoId}`,
       {
         method: "GET",
       }
@@ -58,7 +59,7 @@ export async function getSong(videoId: string) {
     }
 
     // Fallback to Youtube API
-    const res = await fetcher<{ data?: any }>(`${baseUrl}${videoId}`, {
+    const res = await fetcher<{ data?: any }>(`${baseUrl}songs/${videoId}`, {
       method: "GET",
     });
     return { data: res.data.videoDetails, error: null };

@@ -11,6 +11,8 @@ export async function fetcher<T>(
 ): Promise<T> {
   const { method = "GET", body, headers = {}, responseType = "json" } = options;
 
+  console.log(`Trying fetch ${url}`);
+
   const fetchOptions: RequestInit = {
     method,
     headers: {
