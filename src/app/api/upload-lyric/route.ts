@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { uploadToS3 } from "@/lib/s3";
 import { randomUUID } from "crypto";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

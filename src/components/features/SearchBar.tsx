@@ -12,10 +12,21 @@ const geo = Geo({
   subsets: ["latin"],
 });
 
+interface ApiSongData {
+  videoId: string;
+  title: string;
+  artists: Array<{ id: string; name: string }>;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
 interface SongData {
   videoId: string;
   title: string;
   author: string;
+  artists: Array<{ id: string; name: string }>;
   thumbnails: Array<{ url: string }>;
   duration?: string;
   isExplicit?: boolean;
@@ -38,7 +49,7 @@ export default function SearchBar() {
       if (!res.data) return;
 
       // Transform API response to match SongData interface
-      const transformedData = res.data.map((song: any) => ({
+      const transformedData = res.data.map((song: ApiSongData) => ({
         ...song,
         author: song.artists[0].name,
       }));

@@ -35,6 +35,10 @@ export default function LyricsList({
   const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
   const router = useRouter();
 
+  useEffect(() => {
+    setSelectedLyrics([]);
+  }, []);
+
   // Auto-dismiss alert after 3 seconds
   useEffect(() => {
     if (alert && showAlert) {
@@ -176,7 +180,7 @@ export default function LyricsList({
                 lyric={lyric}
                 active={currentLyric?.id === lyric.id}
                 selected={selectedLyrics.some(
-                  (curr: Lyric) => curr.id === lyric.id
+                  (curr: any) => curr.id === lyric.id
                 )}
                 handleSelect={handleSelect}
                 handleClick={handleClick}

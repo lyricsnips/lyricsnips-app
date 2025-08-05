@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-interface Params {
-  videoId: string;
-}
-
 interface ShareData {
   id: string;
   userId: string | null;
@@ -17,7 +13,7 @@ interface ShareData {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<{ videoId: string }> }
 ) {
   const parameters = await params;
   const videoId = parameters.videoId;

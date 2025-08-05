@@ -1,14 +1,15 @@
 "use client";
-import { createContext, useContext, useState, ReactNode, useRef } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
 interface SongData {
   videoId: string;
   title: string;
-  artists: Array<{ id: string; name: string }>;
+  author: string;
   thumbnails: Array<{ url: string }>;
   duration?: string;
   isExplicit?: boolean;
   timesShared?: number;
+  lyrics?: unknown;
 }
 
 interface ResultsContextType {

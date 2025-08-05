@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import { fetchSharedLyrics } from "@/adapters/lyricAdapter";
-import { Frown, Music, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Frown, Music, ExternalLink } from "lucide-react";
 import { Special_Gothic_Expanded_One } from "next/font/google";
 import { defaultButtonStyle } from "@/styles/Buttons";
 import Image from "next/image";
+import Link from "next/link";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
@@ -13,7 +14,7 @@ const gothic = Special_Gothic_Expanded_One({
 export async function generateMetadata({
   params,
 }: {
-  params: { shareId: string };
+  params: Promise<{ shareId: string }>;
 }): Promise<Metadata> {
   const { shareId } = await params;
   const { data: sharedLyrics } = await fetchSharedLyrics(shareId);
@@ -43,18 +44,6 @@ export async function generateMetadata({
   };
 }
 
-interface SharedLyricsData {
-  id: string;
-  videoId: string;
-  lyricsPreviewSrc: string;
-  lyricsJson: unknown;
-  createdAt: Date;
-  user?: {
-    id: string;
-    username: string;
-  } | null;
-}
-
 export default async function SharedLyricsPage({
   params,
 }: {
@@ -65,6 +54,8 @@ export default async function SharedLyricsPage({
 
   const url = `/song/${sharedLyrics?.data?.videoId}?title=${sharedLyrics?.data?.title}&author=${sharedLyrics?.data?.author}&videoId=${sharedLyrics?.data?.videoId}`;
 
+  const username = sharedLyrics.user?.username || "Anonymous";
+
   if (!sharedLyrics.data) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -72,16 +63,16 @@ export default async function SharedLyricsPage({
           <Frown className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h1 className="text-2xl font-bold mb-2">Lyrics Not Found</h1>
           <p className="text-gray-400 mb-6">
-            The shared lyrics you're looking for don't exist or have been
-            removed.
+            The shared lyrics you&apos;re looking for don&apos;t exist or have
+            been removed.
           </p>
-          <a
+          <Link
             href="/"
             className={`inline-flex items-center gap-2 ${defaultButtonStyle}`}
           >
             <Music className="h-4 w-4" />
             Find Other Songs
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -96,7 +87,7 @@ export default async function SharedLyricsPage({
               Shared Lyrics
             </h1>
             <p className="text-sm  text-gray-400">
-              Shared by {sharedLyrics.data.user.username || "Anonymous"}
+              Shared by {username || "Anonymous"}
             </p>
           </div>
 

@@ -6,8 +6,6 @@ interface LyricData {
   text: string;
   start_time: number;
   end_time: number;
-  start?: number;
-  duration?: number;
 }
 
 interface SelectedLyricsContextType {

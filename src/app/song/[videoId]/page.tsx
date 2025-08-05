@@ -13,7 +13,7 @@ import {
 import { useSession } from "next-auth/react";
 import React from "react";
 import { defaultButtonStyle, closeButtonStyle } from "@/styles/Buttons";
-import { useRef, useEffect, use, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import YoutubePlayer from "youtube-player";
 import LyricsList from "@/components/items/LyricsList";
 import ShareModal from "@/components/features/ShareModal";
@@ -119,8 +119,6 @@ export default function SongPage({
 
   // Effect 1: Fetch lyrics and set up YouTube player when videoId changes
   useEffect(() => {
-    setSelectedLyrics([]);
-    setIsSelecting(false);
     setIsLoading(true);
 
     // Get song information from URL parameters

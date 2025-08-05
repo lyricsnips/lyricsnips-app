@@ -64,8 +64,8 @@ export default function SharesPage() {
         const updatedhares = shares.filter((share) => share.id !== shareId);
         setShares(updatedhares);
       }
-    } catch (e) {
-      console.log(`An error occurred while trying to delete share: ${shareId}`);
+    } catch (error) {
+      console.error("Error removing share:", error);
     }
   };
 
@@ -82,17 +82,28 @@ export default function SharesPage() {
       setTimeout(() => setCopiedId(null), 2000); // Reset after 2 seconds
     } catch (error) {
       console.error("Failed to copy link:", error);
-      // Fallback for older browsers
+      // Fallback for older browsers and iOS
       const shareUrl = `${window.location.origin}/shared/${shareId}`;
       const textArea = document.createElement("textarea");
       textArea.value = shareUrl;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
       document.body.appendChild(textArea);
+      textArea.focus();
       textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
 
-      setCopiedId(shareId);
-      setTimeout(() => setCopiedId(null), 2000);
+      try {
+        document.execCommand("copy");
+        setCopiedId(shareId);
+        setTimeout(() => setCopiedId(null), 2000);
+      } catch (fallbackErr) {
+        console.error("Fallback copy failed:", fallbackErr);
+        // Last resort: prompt user to copy manually
+        alert("Please copy this link manually: " + shareUrl);
+      } finally {
+        document.body.removeChild(textArea);
+      }
     }
   };
 

@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { removeFromS3ByUrl } from "@/lib/s3";
 
-interface Params {
-  shareId: string;
-}
-
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<{ shareId: string }> }
 ) {
   const parameters = await params;
   const shareId = parameters.shareId;

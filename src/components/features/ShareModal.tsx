@@ -133,21 +133,35 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
   };
 
   const handleCopy = async () => {
+    if (!shareData) return;
+
     try {
       await navigator.clipboard.writeText(shareData.shareURL);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
     } catch (err) {
       console.error("Failed to copy: ", err);
-      // Fallback for older browsers
+      // Fallback for older browsers and iOS
       const textArea = document.createElement("textarea");
-      textArea.value = songInfo.shareURL;
+      textArea.value = shareData.shareURL; // Fixed: was songInfo.shareURL
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
       document.body.appendChild(textArea);
+      textArea.focus();
       textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (fallbackErr) {
+        console.error("Fallback copy failed:", fallbackErr);
+        // Last resort: prompt user to copy manually
+        alert("Please copy this link manually: " + shareData.shareURL);
+      } finally {
+        document.body.removeChild(textArea);
+      }
     }
   };
 
