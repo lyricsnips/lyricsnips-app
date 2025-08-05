@@ -1,17 +1,25 @@
 "use client";
 
-import { useSelectedLyrics } from "../../contexts/SelectedLyricsContext";
+import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { defaultButtonStyle } from "@/styles/Buttons";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Lyric from "./Lyric";
 import { X } from "lucide-react";
+import type YouTubePlayer from "youtube-player";
+
+interface Lyric {
+  id: string;
+  text: string;
+  start_time: number;
+  end_time: number;
+}
 
 interface LyricsListProps {
-  lyrics: any;
-  currentLyric: any;
+  lyrics: Lyric[];
+  currentLyric: Lyric | null;
   onUserScroll?: () => void;
-  playerInstanceRef: any;
+  playerInstanceRef: React.RefObject<ReturnType<typeof YouTubePlayer> | null>;
   isSelecting: boolean;
 }
 
@@ -39,7 +47,7 @@ export default function LyricsList({
     }
   }, [alert, showAlert]);
 
-  const handleSelect = (lyric: any) => {
+  const handleSelect = (lyric: Lyric) => {
     setAlert("");
 
     if (selectedLyrics.length === 0) {
@@ -47,25 +55,23 @@ export default function LyricsList({
       return;
     }
 
-    const lyricIds = selectedLyrics.map((lyric: any) => lyric.id);
-    let min, max;
-
-    min = Math.min(...lyricIds);
-    max = Math.max(...lyricIds);
+    const lyricIds = selectedLyrics.map((lyric: Lyric) => parseInt(lyric.id));
+    const min = Math.min(...lyricIds);
+    const max = Math.max(...lyricIds);
 
     if (
-      lyric.id === max ||
-      lyric.id === min ||
-      selectedLyrics.some((curr: any) => curr.id === lyric.id)
+      parseInt(lyric.id) === max ||
+      parseInt(lyric.id) === min ||
+      selectedLyrics.some((curr: Lyric) => curr.id === lyric.id)
     ) {
       setAlert("Cannot select same lyric twice");
       setShowAlert(true);
       return;
     }
 
-    if (lyric.id === max + 1 && selectedLyrics.length < 5) {
+    if (parseInt(lyric.id) === max + 1 && selectedLyrics.length < 5) {
       setSelectedLyrics([...selectedLyrics, lyric]);
-    } else if (lyric.id === min - 1 && selectedLyrics.length < 5) {
+    } else if (parseInt(lyric.id) === min - 1 && selectedLyrics.length < 5) {
       setSelectedLyrics([lyric, ...selectedLyrics]);
     } else {
       setSelectedLyrics([lyric]);
@@ -113,15 +119,15 @@ export default function LyricsList({
     );
   }
 
-  const handleClick = (lyric: any) => {
+  const handleClick = async (lyric: Lyric) => {
     if (playerInstanceRef.current && playerInstanceRef.current.getPlayerState) {
       try {
         // Convert milliseconds to seconds
         const seekTime = lyric.start_time / 1000;
-        playerInstanceRef.current.seekTo(seekTime);
+        playerInstanceRef.current.seekTo(seekTime, true);
 
         // Optionally start playing if paused
-        const playerState = playerInstanceRef.current.getPlayerState();
+        const playerState = await playerInstanceRef.current.getPlayerState();
         if (playerState !== 1) {
           // 1 = playing
           playerInstanceRef.current.playVideo();
@@ -158,7 +164,7 @@ export default function LyricsList({
           onWheel={handleScroll}
           onTouchMove={handleScroll}
         >
-          {lyrics.map((lyric: any) => (
+          {lyrics.map((lyric: Lyric) => (
             <div
               key={lyric.id}
               id={`lyric-${lyric.id}`}
@@ -170,7 +176,7 @@ export default function LyricsList({
                 lyric={lyric}
                 active={currentLyric?.id === lyric.id}
                 selected={selectedLyrics.some(
-                  (curr: any) => curr.id === lyric.id
+                  (curr: Lyric) => curr.id === lyric.id
                 )}
                 handleSelect={handleSelect}
                 handleClick={handleClick}

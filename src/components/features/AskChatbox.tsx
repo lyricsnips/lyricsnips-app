@@ -3,10 +3,29 @@ import { askGemini } from "@/adapters/lyricAdapter";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { useState } from "react";
 
+interface LyricData {
+  id: string;
+  text: string;
+  start_time: number;
+  end_time: number;
+  start?: number;
+  duration?: number;
+}
+
+interface SongInfo {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
 interface AskChatBotProps {
-  setAsking: any;
-  songInfo: any;
-  lyrics: any;
+  setAsking: (asking: boolean) => void;
+  songInfo: SongInfo;
+  lyrics: LyricData[];
 }
 
 export default function AskChatBot({
@@ -33,11 +52,11 @@ export default function AskChatBot({
     };
 
     try {
-      const res: any = await askGemini(body);
+      const res = await askGemini(body);
       if (res.data) {
         setAnswer(res.data.answer);
       }
-    } catch (error) {
+    } catch {
       setAnswer("Sorry, I couldn't process your question. Please try again.");
     } finally {
       setIsLoading(false);

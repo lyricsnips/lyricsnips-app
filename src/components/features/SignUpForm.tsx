@@ -9,6 +9,7 @@ import { defaultButtonStyle } from "@/styles/Buttons";
 
 const geo = Geo({
   weight: ["400"],
+  subsets: ["latin"],
 });
 
 export default function SignUpForm() {

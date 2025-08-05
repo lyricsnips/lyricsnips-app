@@ -9,10 +9,12 @@ import { useState, useEffect, useRef } from "react";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
+  subsets: ["latin", "latin-ext"],
 });
 
 const geo = Geo({
   weight: ["400"],
+  subsets: ["latin"],
 });
 
 export default function Navbar() {
@@ -69,6 +71,14 @@ export default function Navbar() {
     }
   };
 
+  const handleLibraryClick = () => {
+    if (session) {
+      router.push("/shares");
+    } else {
+      openModal("signup");
+    }
+  };
+
   const handleSignOut = () => {
     signOut({ redirect: false });
     setIsDropdownOpen(false);
@@ -99,7 +109,7 @@ export default function Navbar() {
       <div className="ml-auto flex items-center gap-3">
         <button
           type="button"
-          onClick={() => router.push("/shares")}
+          onClick={handleLibraryClick}
           className={`${geo.className} w-10 h-10 bg-black text-white-700 font-semibold border-white border hover:bg-white hover:text-black transition flex items-center justify-center`}
         >
           <LibraryBig size={20} />

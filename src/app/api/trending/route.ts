@@ -20,25 +20,25 @@ export async function GET() {
     // Fetch the song metadata for each trending videoId
     const trendingSongs = await Promise.all(
       sortedCounts.map(async (item) => {
-        const cachedSong = await prisma.cachedSong.findUnique({
+        const song = await prisma.share.findFirst({
           where: { videoId: item.videoId },
           select: {
             videoId: true,
             title: true,
             author: true,
-            thumbnails: true,
           },
         });
 
         return {
           videoId: item.videoId,
-          title: cachedSong?.title || "Unknown Title",
-          author: cachedSong?.author || "Unknown Artist",
-          thumbnails: cachedSong?.thumbnails || [],
+          title: song?.title || "Unknown Title",
+          author: song?.author || "Unknown Artist",
           count: item._count.videoId,
         };
       })
     );
+
+    console.log(trendingSongs);
 
     return NextResponse.json(trendingSongs);
   } catch (error) {

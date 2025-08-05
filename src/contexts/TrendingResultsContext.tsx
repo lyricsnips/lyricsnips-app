@@ -1,8 +1,18 @@
 import React, { createContext, useContext, useState } from "react";
 
+interface SongData {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
 interface TrendingResultsContextType {
-  trendingResults: any[];
-  setTrendingResults: any;
+  trendingResults: SongData[];
+  setTrendingResults: (results: SongData[]) => void;
 }
 
 const TrendingResultsContext = createContext<
@@ -14,7 +24,7 @@ export const TrendingResultsProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [trendingResults, setTrendingResults] = useState<any[]>([]);
+  const [trendingResults, setTrendingResults] = useState<SongData[]>([]);
   return (
     <TrendingResultsContext.Provider
       value={{ trendingResults, setTrendingResults }}

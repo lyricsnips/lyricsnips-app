@@ -5,6 +5,16 @@ interface Params {
   videoId: string;
 }
 
+interface ShareData {
+  id: string;
+  userId: string | null;
+  videoId: string;
+  lyrics_preview_src: string;
+  lyricsJson: unknown;
+  createdAt: Date;
+  username?: string;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Params }
@@ -31,7 +41,7 @@ export async function GET(
     });
 
     const result = await Promise.all(
-      lyrics.map(async (share: any) => {
+      lyrics.map(async (share: ShareData) => {
         if (!share.userId) return { ...share };
         const user = await prisma.user.findUnique({
           where: {

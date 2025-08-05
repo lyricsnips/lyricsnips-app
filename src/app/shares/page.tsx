@@ -6,14 +6,17 @@ import { useEffect, useState } from "react";
 import { deleteShare, getShares } from "@/adapters/sharesAdapter";
 import { Special_Gothic_Expanded_One, Geo } from "next/font/google";
 import { defaultButtonStyle } from "@/styles/Buttons";
-import { Copy, Trash2, Eye } from "lucide-react";
+import { Copy, Trash2, Eye, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
+  subsets: ["latin", "latin-ext"],
 });
 
 const geo = Geo({
   weight: ["400"],
+  subsets: ["latin"],
 });
 
 interface SharedLyric {
@@ -33,14 +36,14 @@ export default function SharesPage() {
   useEffect(() => {
     async function fetchShares() {
       try {
-        const response: any = await getShares();
+        const response = await getShares();
         if (response.data) {
           setShares(response.data);
         } else {
           throw Error("Failed to get shares from api/shares");
         }
-      } catch (error) {
-        console.error("Error fetching shares:", error);
+      } catch {
+        console.error("Error fetching shares");
       } finally {
         setLoading(false);
       }
@@ -147,7 +150,9 @@ export default function SharesPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen ">
         <div className="text-center max-w-md mx-auto p-6">
-          <p className="text-white mb-4">You haven't shared any lyrics yet!</p>
+          <p className="text-white mb-4">
+            You haven&apos;t shared any lyrics yet!
+          </p>
           <button
             onClick={() => router.push("/")}
             className={`${defaultButtonStyle} ${geo.className}`}
@@ -175,9 +180,11 @@ export default function SharesPage() {
                 key={share.id}
                 className="bg-black border border-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <img
+                <ImageWithFallback
                   src={share.lyrics_preview_src}
                   alt="Lyrics preview"
+                  width={400}
+                  height={300}
                   className="w-full h-fit"
                 />
                 <div className="p-4">
@@ -223,5 +230,45 @@ export default function SharesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Image component with fallback
+function ImageWithFallback({
+  src,
+  alt,
+  width,
+  height,
+  className,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  className: string;
+}) {
+  const [imageError, setImageError] = useState(false);
+
+  // Check for valid src before rendering Image component
+  if (!src || imageError) {
+    return (
+      <div className="w-full h-48 bg-gray-800 flex items-center justify-center border border-gray-600">
+        <div className="text-gray-400 text-center">
+          <ImageIcon className="w-12 h-12 mx-auto mb-2" />
+          <p className="text-sm">Image not available</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      className={className}
+      onError={() => setImageError(true)}
+    />
   );
 }

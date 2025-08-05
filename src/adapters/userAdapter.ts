@@ -1,21 +1,31 @@
 import { fetcher } from "@/lib/fetcher";
-import { signIn } from "next-auth/react";
 
-interface userData {
+interface UserData {
   username: string;
   password: string;
 }
 
-const baseUrl = "api/users";
+interface ApiResponse<T> {
+  data?: T;
+}
 
-export async function createUser(userData: userData) {
+interface ErrorResponse {
+  message: string;
+}
+
+const baseUrl = "/api/users";
+
+export async function createUser(userData: UserData) {
   try {
-    const res = await fetcher<{ data?: any }>(baseUrl, {
+    const res = await fetcher<ApiResponse<{ success: boolean }>>(baseUrl, {
       method: "POST",
       body: userData,
     });
+
+    console.log(res);
     return { data: res.data, error: null };
-  } catch (e: any) {
-    return { data: null, error: e.message || "Unknown error" };
+  } catch (e: unknown) {
+    const error = e as ErrorResponse;
+    return { data: null, error: error.message || "Unknown error" };
   }
 }

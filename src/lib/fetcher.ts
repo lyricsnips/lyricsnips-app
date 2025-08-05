@@ -1,6 +1,6 @@
 export interface FetcherOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
   responseType?: "json" | "blob";
 }

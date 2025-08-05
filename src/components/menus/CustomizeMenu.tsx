@@ -10,6 +10,7 @@ import {
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
+  subsets: ["latin", "latin-ext"],
 });
 
 const unifraktur = UnifrakturMaguntia({

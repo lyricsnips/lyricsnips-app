@@ -1,10 +1,19 @@
 "use client";
-import { ObjectEncodingOptions } from "fs";
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useRef } from "react";
+
+interface SongData {
+  videoId: string;
+  title: string;
+  artists: Array<{ id: string; name: string }>;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
 
 interface ResultsContextType {
-  results: Object[];
-  setSearchResults: (results: Object[]) => void;
+  results: SongData[];
+  setSearchResults: (results: SongData[]) => void;
 }
 
 const SearchResultsContext = createContext<ResultsContextType | undefined>(
@@ -12,9 +21,9 @@ const SearchResultsContext = createContext<ResultsContextType | undefined>(
 );
 
 export function SearchResultsProvider({ children }: { children: ReactNode }) {
-  const [results, setResults] = useState<Object[]>([]);
+  const [results, setResults] = useState<SongData[]>([]);
 
-  const setSearchResults = (results: Object[]) => {
+  const setSearchResults = (results: SongData[]) => {
     setResults(results);
   };
 

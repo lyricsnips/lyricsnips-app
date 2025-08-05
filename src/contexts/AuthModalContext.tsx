@@ -14,7 +14,6 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export function AuthModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState<ReactNode>(null);
   const [tab, setTab] = useState<undefined | "login" | "signup">(undefined);
 
   const openModal = (tab: "login" | "signup") => {
@@ -29,7 +28,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
 
   return (
     <ModalContext.Provider
-      value={{ isOpen, content, openModal, closeModal, tab, setTab }}
+      value={{ isOpen, content: null, openModal, closeModal, tab, setTab }}
     >
       {children}
     </ModalContext.Provider>

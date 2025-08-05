@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { getSongs } from "@/adapters/YTAdapter";
 import { useSearchResults } from "@/contexts/SearchResultsContext";
 import { useTabContext } from "@/contexts/CurrentTabContext";
@@ -9,32 +9,51 @@ import { Search } from "lucide-react";
 
 const geo = Geo({
   weight: ["400"],
+  subsets: ["latin"],
 });
+
+interface SongData {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+  lyrics?: unknown;
+}
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
   const { setSearchResults } = useSearchResults();
   const { setTab } = useTabContext();
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       // Fetch from external YT python API
       const res = await getSongs(query);
+
       if (!res.data) return;
 
-      setSearchResults(res.data);
+      // Transform API response to match SongData interface
+      const transformedData = res.data.map((song: any) => ({
+        ...song,
+        author: song.artists[0].name,
+      }));
+
+      setSearchResults(transformedData);
       setQuery("");
       setTab("search");
 
       // Create a map to track updates
-      const resultsMap: any = new Map(
-        res.data.map((song: any) => [song.videoId, song])
+      const resultsMap: Map<string, SongData> = new Map(
+        transformedData.map((song: SongData) => [song.videoId, song])
       );
 
       // Fetch lyrics and update immediately when each resolves
-      res.data.forEach(async (song: any) => {
+      transformedData.forEach(async (song: SongData) => {
         try {
           const lyrics = await getSharedLyrics(song.videoId);
           const updatedSong =

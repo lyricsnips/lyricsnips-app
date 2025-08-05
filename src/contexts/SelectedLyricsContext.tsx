@@ -1,9 +1,18 @@
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
 
+interface LyricData {
+  id: string;
+  text: string;
+  start_time: number;
+  end_time: number;
+  start?: number;
+  duration?: number;
+}
+
 interface SelectedLyricsContextType {
-  selectedLyrics: any[];
-  setSelectedLyrics: (lyrics: any[]) => void;
+  selectedLyrics: LyricData[];
+  setSelectedLyrics: (lyrics: LyricData[]) => void;
 }
 
 const SelectedLyricsContext = createContext<
@@ -11,7 +20,7 @@ const SelectedLyricsContext = createContext<
 >(undefined);
 
 export function SelectedLyricsProvider({ children }: { children: ReactNode }) {
-  const [selectedLyrics, setSelectedLyrics] = useState<any[]>([]);
+  const [selectedLyrics, setSelectedLyrics] = useState<LyricData[]>([]);
 
   return (
     <SelectedLyricsContext.Provider

@@ -1,28 +1,38 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import SongCard from "../items/SongCard";
 import { useRouter } from "next/navigation";
 import { getTrendingSongs } from "@/adapters/YTAdapter";
 import { useTabContext } from "@/contexts/CurrentTabContext";
-import { getSong } from "@/adapters/YTAdapter";
 import { useTrendingResultsContext } from "@/contexts/TrendingResultsContext";
 import { getSharedLyrics } from "@/adapters/lyricAdapter";
+
+interface SongData {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+  lyrics?: unknown;
+}
 
 export default function TrendingList() {
   const { currentTab } = useTabContext();
   const { trendingResults, setTrendingResults } = useTrendingResultsContext();
   const router = useRouter();
 
-  const fetchTrendingSongs = async () => {
+  const fetchTrendingSongs = useCallback(async () => {
     try {
-      const res: any = await getTrendingSongs();
+      const res = await getTrendingSongs();
 
       if (!res.data) return;
 
-      const cleanResults = res.data.map((song: any) => {
+      const cleanResults = res.data.map((song: SongData) => {
         return {
           videoId: song.videoId,
           title: song.title,
-          thumbnails: song.thumbnails,
+          thumbnails: `https://img.youtube.com/vi/${song.videoId}/maxresdefault.jpg`,
           artists: song.author,
           timesShared: song.count,
         };
@@ -30,11 +40,11 @@ export default function TrendingList() {
 
       setTrendingResults(cleanResults);
 
-      const resultsMap: any = new Map(
-        cleanResults.map((song: any) => [song.videoId, song])
+      const resultsMap: Map<string, SongData> = new Map(
+        cleanResults.map((song: SongData) => [song.videoId, song])
       );
 
-      cleanResults.forEach(async (song: any) => {
+      cleanResults.forEach(async (song: SongData) => {
         try {
           const lyrics = await getSharedLyrics(song.videoId);
 
@@ -53,25 +63,33 @@ export default function TrendingList() {
     } catch (error) {
       console.error("Error fetching songs or lyrics:", error);
     }
-  };
+  }, [setTrendingResults]);
 
   useEffect(() => {
     if (currentTab === "trending" && trendingResults.length === 0) {
       fetchTrendingSongs();
     }
-  }, []);
+  }, [currentTab, trendingResults.length, fetchTrendingSongs]);
 
-  const handlePlay = (videoId: string) => {
-    router.push(`/song/${videoId}`);
+  const handlePlay = (songData: string) => {
+    const params = new URLSearchParams({
+      title: songData.title,
+      author: songData.artists,
+      videoId: songData.videoId,
+    });
+    router.push(`/song/${songData.videoId}?${params.toString()}`);
   };
 
   return (
     <>
       <ul className="flex flex-col gap-4">
-        {trendingResults.map((song: any) => {
+        {trendingResults.map((song: SongData) => {
           return (
             <li key={song.videoId}>
-              <SongCard song={song} handlePlay={handlePlay}></SongCard>
+              <SongCard
+                song={song}
+                handlePlay={() => handlePlay(song)}
+              ></SongCard>
             </li>
           );
         })}

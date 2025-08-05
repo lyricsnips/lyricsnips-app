@@ -5,17 +5,34 @@ import html2canvas from "html2canvas";
 import { useSession } from "next-auth/react";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import CustomizeMenu, { CustomizeSettings } from "../menus/CustomizeMenu";
-import { Special_Gothic_Expanded_One, Geo } from "next/font/google";
+import { Special_Gothic_Expanded_One } from "next/font/google";
 import LyriCard from "../items/LyricCard";
 import { defaultButtonStyle } from "@/styles/Buttons";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
+  subsets: ["latin", "latin-ext"],
 });
 
+interface SongInfo {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
 interface ShareModalProps {
-  songInfo: any;
+  songInfo: SongInfo;
   onClose: () => void;
+}
+
+interface ShareData {
+  id: string;
+  shareURL: string;
+  imageUrl: string;
 }
 
 // Ideal card dimensions for social media sharing
@@ -36,7 +53,7 @@ const CARD_CONFIG = {
 export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
   const { data: session } = useSession();
   const lyricCardRef = useRef(null);
-  const [shareData, setShareData] = useState<any>(null);
+  const [shareData, setShareData] = useState<ShareData | null>(null);
   const [copied, setCopied] = useState(false);
   const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
   const [settings, setSettings] = useState<CustomizeSettings>({
@@ -82,12 +99,12 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       formData.append("image", blob, "component-image.png");
       formData.append("videoId", songInfo.videoId);
       formData.append("lyrics", JSON.stringify(selectedLyrics));
-      formData.append(
-        "thumbnails",
-        JSON.stringify(
-          songInfo?.thumbnail?.thumbnails || songInfo?.thumbnails || []
-        )
-      );
+      // formData.append(
+      //   "thumbnails",
+      //   JSON.stringify(
+      //     songInfo?.thumbnail?.thumbnails || songInfo?.thumbnails || []
+      //   )
+      // );
       formData.append("title", songInfo.title);
       formData.append("author", songInfo.author);
       formData.append("filename", `image-${Date.now()}.png`);

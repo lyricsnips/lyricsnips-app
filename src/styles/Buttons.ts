@@ -2,6 +2,7 @@ import { Geo } from "next/font/google";
 
 const geo = Geo({
   weight: ["400"],
+  subsets: ["latin"],
 });
 
 export const defaultButtonStyle = `${geo.className} px-2 py-2 bg-black text-white-700 font-semibold border-white border hover:bg-white hover:text-black transition cursor-pointer flex gap-2 items-center`;

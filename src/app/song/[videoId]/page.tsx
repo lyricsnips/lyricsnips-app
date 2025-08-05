@@ -6,11 +6,12 @@ import {
   Play,
   Pause,
   RotateCcw,
-  TextSelectIcon,
   Pointer,
   PointerOff,
   Sparkle,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import React from "react";
 import { defaultButtonStyle, closeButtonStyle } from "@/styles/Buttons";
 import { useRef, useEffect, use, useState, useCallback } from "react";
 import YoutubePlayer from "youtube-player";
@@ -18,20 +19,40 @@ import LyricsList from "@/components/items/LyricsList";
 import ShareModal from "@/components/features/ShareModal";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { getLyrics } from "@/adapters/YTAdapter";
-import { getSong } from "@/adapters/YTAdapter";
 import { Special_Gothic_Expanded_One } from "next/font/google";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 import AskChatBot from "@/components/features/AskChatbox";
+import type YouTubePlayer from "youtube-player";
+import { useSearchParams } from "next/navigation";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
+  subsets: ["latin", "latin-ext"],
 });
 
+interface Lyric {
+  id: string;
+  text: string;
+  start_time: number;
+  end_time: number;
+}
+
+interface SongInfo {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
 // Custom hook for auto-scroll management
-const useAutoScroll = (currentLyric: any) => {
+const useAutoScroll = (currentLyric: Lyric | null) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [lastUserInteraction, setLastUserInteraction] = useState(0);
-  const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
+  const { selectedLyrics } = useSelectedLyrics();
 
   // Auto-resume after 3 seconds
   useEffect(() => {
@@ -66,23 +87,32 @@ const useAutoScroll = (currentLyric: any) => {
   return { autoScrollEnabled, handleUserScroll };
 };
 
-export default function SongPage({ params }: { params: any }) {
-  const { videoId } = use<any>(params);
-  const [songInfo, setSongInfo] = useState<any>({});
-  const [lyrics, setLyrics] = useState<any>([]);
-  const [currentLyric, setCurrentLyric] = useState<any>(null);
+export default function SongPage({
+  params,
+}: {
+  params: Promise<{ videoId: string }>;
+}) {
+  const { data: session } = useSession();
+  const { openModal } = useAuthModal();
+  const { videoId } = React.use(params);
+  const searchParams = useSearchParams();
+  const [songInfo, setSongInfo] = useState<SongInfo>({} as SongInfo);
+  const [lyrics, setLyrics] = useState<Lyric[]>([]);
+  const [currentLyric, setCurrentLyric] = useState<Lyric | null>(null);
   const [playerStatus, setPlayerStatus] = useState<number | undefined>(
     undefined
   );
   const [isPlaying, setIsPlaying] = useState(false);
   const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
   const playerRef = useRef<HTMLDivElement>(null);
-  const playerInstanceRef = useRef<any>(null);
+  const playerInstanceRef = useRef<ReturnType<typeof YouTubePlayer> | null>(
+    null
+  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isAsking, setAsking] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   // Auto-scroll hook
   const { handleUserScroll } = useAutoScroll(currentLyric);
@@ -90,13 +120,35 @@ export default function SongPage({ params }: { params: any }) {
   // Effect 1: Fetch lyrics and set up YouTube player when videoId changes
   useEffect(() => {
     setSelectedLyrics([]);
-    setIsLoading(true); // Set loading to true when starting
+    setIsSelecting(false);
+    setIsLoading(true);
 
-    // Get song information
-    const getSongInfo = async () => {
-      const res = await getSong(videoId);
-      if (res.data) {
-        setSongInfo(res.data);
+    // Get song information from URL parameters
+    const getSongInfo = () => {
+      const title = searchParams.get("title");
+      const author = searchParams.get("author");
+
+      if (title && author) {
+        setSongInfo({
+          videoId,
+          title,
+          author,
+          thumbnails: [],
+          duration: undefined,
+          isExplicit: false,
+          timesShared: 0,
+        });
+      } else {
+        // Fallback: show loading state
+        setSongInfo({
+          videoId,
+          title: "Loading...",
+          author: "Loading...",
+          thumbnails: [],
+          duration: undefined,
+          isExplicit: false,
+          timesShared: 0,
+        });
       }
     };
 
@@ -106,12 +158,19 @@ export default function SongPage({ params }: { params: any }) {
     // Fetch lyrics and set up player instance
     const fetchLyricsAndSetupPlayer = async () => {
       const res = await getLyrics(videoId);
+
       if (!isMounted) return;
 
       if (!res.data) {
-        setLyrics(null);
+        setLyrics([]);
       } else {
-        setLyrics(res.data.lyrics);
+        const allLyrics: {
+          hasTimestamps: boolean;
+          lyrics: Array<Lyric>;
+          source: "Source: Musixmatch";
+        } = res.data;
+
+        setLyrics(allLyrics.lyrics);
       }
 
       if (playerDiv) {
@@ -119,17 +178,20 @@ export default function SongPage({ params }: { params: any }) {
         playerInstanceRef.current = YoutubePlayer(playerDiv);
 
         // Wait for the player to be ready before loading the video
-        playerInstanceRef.current.on("ready", () => {
-          playerInstanceRef.current.loadVideoById(videoId);
+        playerInstanceRef.current?.on("ready", () => {
+          playerInstanceRef.current?.loadVideoById(videoId);
         });
 
         // Listen for player state changes (e.g., play, pause)
-        playerInstanceRef.current.on("stateChange", (state: any) => {
-          setPlayerStatus(state.data);
-          setIsPlaying(state.data === 1); // 1 = playing
-        });
+        playerInstanceRef.current?.on(
+          "stateChange",
+          (state: { data: number }) => {
+            setPlayerStatus(state.data);
+            setIsPlaying(state.data === 1); // 1 = playing
+          }
+        );
       }
-      setIsLoading(false); // Set loading to false when done
+      setIsLoading(false);
     };
 
     fetchLyricsAndSetupPlayer();
@@ -144,7 +206,7 @@ export default function SongPage({ params }: { params: any }) {
         playerInstanceRef.current = null;
       }
     };
-  }, [videoId]);
+  }, [videoId, searchParams]);
 
   // Effect 2: Sync lyrics with video playback when player is playing
   useEffect(() => {
@@ -154,9 +216,10 @@ export default function SongPage({ params }: { params: any }) {
     // Only start syncing if player is playing, lyrics are loaded, and player exists
     if (playerStatus === 1 && lyrics?.length > 0 && playerInstanceRef.current) {
       intervalRef.current = setInterval(async () => {
-        const currentTime = await playerInstanceRef.current.getCurrentTime();
+        const currentTime = await playerInstanceRef.current?.getCurrentTime();
+        if (!currentTime) return;
 
-        const foundLyric: any = lyrics.find((lyric: any) => {
+        const foundLyric: Lyric | undefined = lyrics.find((lyric: Lyric) => {
           const startTimeSeconds = lyric.start_time / 1000;
           const endTimeSeconds = lyric.end_time / 1000;
           return (
@@ -169,7 +232,7 @@ export default function SongPage({ params }: { params: any }) {
           setCurrentLyric(null);
         } else {
           // Only update if the lyric actually changed
-          setCurrentLyric((prev: any) => {
+          setCurrentLyric((prev: Lyric | null) => {
             if (foundLyric && foundLyric.id !== prev?.id) {
               return foundLyric;
             }
@@ -197,7 +260,7 @@ export default function SongPage({ params }: { params: any }) {
 
   const handleRestart = () => {
     if (playerInstanceRef.current) {
-      playerInstanceRef.current.seekTo(0);
+      playerInstanceRef.current.seekTo(0, true);
       playerInstanceRef.current.playVideo();
     }
   };
@@ -212,6 +275,14 @@ export default function SongPage({ params }: { params: any }) {
 
   const toggleNavigationMode = () => {
     setIsSelecting(!isSelecting);
+  };
+
+  const handleAskClick = () => {
+    if (session) {
+      setAsking(true);
+    } else {
+      openModal("signup");
+    }
   };
 
   // Skeleton component for title and author
@@ -332,7 +403,7 @@ export default function SongPage({ params }: { params: any }) {
             />
           </div>
           {lyrics && lyrics.length > 0 && (
-            <p className="text-gray-400 text-sm">Lyrics by Youtube Music</p>
+            <p className="text-gray-400 text-sm">Source: Musixmatch</p>
           )}
         </div>
 
@@ -356,11 +427,14 @@ export default function SongPage({ params }: { params: any }) {
             </button>
             <button
               type="button"
-              className={defaultButtonStyle}
-              onClick={() => setAsking(true)}
+              className={`${defaultButtonStyle}`}
+              onClick={handleAskClick}
             >
-              <Sparkle size="20" />
-              Ask
+              <Sparkle
+                size="20"
+                className={session ? "white" : "text-gray-500"}
+              />
+              <span className={session ? "white" : "text-gray-500 "}>Ask</span>
             </button>
           </div>
         )}

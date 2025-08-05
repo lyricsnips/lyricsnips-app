@@ -3,7 +3,6 @@
 import SearchBar from "@/components/features/SearchBar";
 import ResultsList from "@/components/features/ResultsList";
 import TrendingList from "@/components/features/TrendingList";
-import Title from "@/components/items/Title";
 import { useTabContext } from "@/contexts/CurrentTabContext";
 
 export default function Home() {
@@ -11,7 +10,6 @@ export default function Home() {
 
   return (
     <div className="h-full flex flex-col">
-      <Title />
       <div className="w-full flex justify-center flex-1 overflow-hidden">
         <div className="ml-3 mr-3 w-full max-w-4xl flex flex-col">
           <SearchBar />

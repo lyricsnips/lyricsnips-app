@@ -4,14 +4,15 @@ import { useAuthModal } from "@/contexts/AuthModalContext";
 import LogInForm from "@/components/features/LogInForm";
 import SignUpForm from "./SignUpForm";
 import { Special_Gothic_Expanded_One, Geo } from "next/font/google";
-import { defaultButtonStyle } from "@/styles/Buttons";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
+  subsets: ["latin", "latin-ext"],
 });
 
 const geo = Geo({
   weight: ["400"],
+  subsets: ["latin"],
 });
 
 export default function AuthModal() {

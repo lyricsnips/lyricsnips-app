@@ -1,17 +1,33 @@
-import LyricCard from "./LyricCard";
-import { Play, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Play,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+} from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
+
+interface LyricObject {
+  id: string;
+  text: string;
+}
+
+interface LyricData {
+  id: string;
+  lyricsJson: LyricObject[];
+  username?: string;
+}
 
 interface Song {
   videoId: string;
-  album: { name: string };
-  artists: { name: string }[];
+  album?: { name: string };
+  artists: Array<{ id: string; name: string }>;
   duration: string;
   isExplicit: boolean;
   thumbnails: { url: string }[];
   title: string;
   timesShared: number;
-  lyrics: undefined | [];
+  lyrics?: LyricData[] | undefined;
 }
 
 export default function SongCard({
@@ -22,11 +38,18 @@ export default function SongCard({
   handlePlay: (videoId: string) => void;
 }) {
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
-  const thumbnail =
-    song.thumbnails && Array.isArray(song.thumbnails)
-      ? song.thumbnails[song.thumbnails.length - 1]?.url
-      : "";
+  let thumbnail;
+  let isStringThumbnail = false;
+
+  if (Array.isArray(song.thumbnails)) {
+    thumbnail = song.thumbnails[song.thumbnails.length - 1]?.url;
+    isStringThumbnail = false;
+  } else {
+    thumbnail = song.thumbnails ?? "";
+    isStringThumbnail = true;
+  }
 
   let artistNames;
 
@@ -36,7 +59,7 @@ export default function SongCard({
     artistNames = song.artists;
   }
 
-  const lyrics: any = song.lyrics || [];
+  const lyrics: LyricData[] = song.lyrics || [];
   const totalLyrics = lyrics.length;
 
   const nextLyric = () => {
@@ -60,7 +83,7 @@ export default function SongCard({
                     <div key={lyrics[currentLyricIndex].id}>
                       <div className="flex flex-col">
                         {lyrics[currentLyricIndex].lyricsJson.map(
-                          (lyricObject: any) => {
+                          (lyricObject: LyricObject) => {
                             return (
                               <span key={lyricObject.id} className="text-black">
                                 {lyricObject.text}
@@ -102,13 +125,28 @@ export default function SongCard({
       )}
 
       <div className="flex items-center gap-4 p-4 w-full">
-        <img
-          src={thumbnail}
-          alt={song.title}
-          width={60}
-          height={60}
-          className="rounded"
-        />
+        {thumbnail && !imageError ? (
+          <div
+            className={`w-[60px] h-[60px] overflow-hidden rounded ${
+              isStringThumbnail ? "flex items-center justify-center" : ""
+            }`}
+          >
+            <Image
+              src={thumbnail}
+              alt={song.title}
+              width={60}
+              height={60}
+              className={`rounded ${
+                isStringThumbnail ? "object-cover w-full h-full" : ""
+              }`}
+              onError={() => setImageError(true)}
+            />
+          </div>
+        ) : (
+          <div className="w-[60px] h-[60px] bg-gray-800 flex items-center justify-center border border-gray-600 rounded">
+            <ImageIcon className="w-8 h-8 text-gray-400" />
+          </div>
+        )}
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold">{song.title}</h3>

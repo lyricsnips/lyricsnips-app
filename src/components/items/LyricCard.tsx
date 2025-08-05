@@ -2,13 +2,30 @@ import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { Special_Gothic_Expanded_One } from "next/font/google";
 
 const gothic = Special_Gothic_Expanded_One({
-  weight: "400",
+  weight: ["400"],
+  subsets: ["latin", "latin-ext"],
 });
 
+interface SongInfo {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
+interface CustomizeSettings {
+  backgroundColor: string;
+  fontFamily: string;
+  textColor: string;
+}
+
 interface LyricCardProps {
-  songInfo: any;
-  settings: any;
-  lyricCardRef: any;
+  songInfo: SongInfo;
+  settings: CustomizeSettings;
+  lyricCardRef: React.RefObject<HTMLDivElement>;
 }
 
 export default function LyriCard({

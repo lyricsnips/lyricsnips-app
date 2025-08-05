@@ -1,6 +1,27 @@
 import { Golos_Text } from "next/font/google";
 
-const golos = Golos_Text({ weight: ["400"] });
+const golos = Golos_Text({
+  weight: ["400"],
+  subsets: ["latin"],
+});
+
+interface LyricData {
+  id: string;
+  text: string;
+  start_time: number;
+  end_time: number;
+  start?: number;
+  duration?: number;
+}
+
+interface LyricProps {
+  lyric: LyricData;
+  active: boolean;
+  selected: boolean;
+  handleSelect: (lyric: LyricData) => void;
+  handleClick: (lyric: LyricData) => void;
+  isSelecting: boolean;
+}
 
 export default function Lyric({
   lyric,
@@ -9,14 +30,7 @@ export default function Lyric({
   handleSelect,
   handleClick,
   isSelecting,
-}: {
-  lyric: any;
-  active: boolean;
-  selected: boolean;
-  handleSelect: (lyric: any) => void;
-  handleClick: (lyric: any) => void;
-  isSelecting: boolean;
-}) {
+}: LyricProps) {
   return (
     <div
       className={`${golos.className} 

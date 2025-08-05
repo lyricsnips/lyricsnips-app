@@ -73,8 +73,9 @@ export async function DELETE(
       message: `Deleted share with id: ${shareId}`,
       deletedShare: result,
     });
-  } catch (error: any) {
-    if (error.code === "P2025") {
+  } catch (error: unknown) {
+    const prismaError = error as { code?: string };
+    if (prismaError.code === "P2025") {
       // Record not found
       return NextResponse.json(
         { error: "Share not found or you don't have permission to delete it" },
@@ -89,4 +90,3 @@ export async function DELETE(
     );
   }
 }
-

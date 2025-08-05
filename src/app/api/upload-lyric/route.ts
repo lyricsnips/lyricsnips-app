@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const lyrics = formData.get("lyrics") as string;
     const author = formData.get("author") as string;
     const title = formData.get("title") as string;
-    const thumbnailsRaw = formData.get("thumbnails") as string;
+    // const thumbnailsRaw = formData.get("thumbnails") as string;
 
     // Validate required fields
     if (!imageFile || !videoId || !lyrics) {
@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
 
     // Store in database
     const shareData = {
-      userId: userId || null,
+      user: userId ? { connect: { id: userId } } : undefined,
+      title: title,
+      author: author,
       videoId: videoId,
       lyrics_preview_src: imageUrl,
       lyricsJson: JSON.parse(lyrics),
@@ -51,34 +53,37 @@ export async function POST(req: NextRequest) {
       select: {
         id: true,
         videoId: true,
+        title: true,
+        author: true,
         lyrics_preview_src: true,
       },
     });
 
     // Store in cache for trending tab to fetch in the future
-    try {
-      await prisma.cachedSong.upsert({
-        where: {
-          videoId: videoId,
-        },
-        update: {
-          title: title,
-          author: author,
-          thumbnails: JSON.parse(thumbnailsRaw),
-          updatedAt: new Date(),
-        },
-        create: {
-          videoId: videoId,
-          title: title,
-          author: author,
-          thumbnails: JSON.parse(thumbnailsRaw),
-        },
-      });
-    } catch (error) {
-      // Log the error but don't fail the upload
-      console.log("Failed to cache song data:", error);
-      // Continue with the upload process
-    }
+    // Disable cache since author and title stored in url params
+    // try {
+    //   await prisma.cachedSong.upsert({
+    //     where: {
+    //       videoId: videoId,
+    //     },
+    //     update: {
+    //       title: title,
+    //       author: author,
+    //       thumbnails: JSON.parse(thumbnailsRaw),
+    //       updatedAt: new Date(),
+    //     },
+    //     create: {
+    //       videoId: videoId,
+    //       title: title,
+    //       author: author,
+    //       thumbnails: JSON.parse(thumbnailsRaw),
+    //     },
+    //   });
+    // } catch (error) {
+    //   // Log the error but don't fail the upload
+    //   console.log("Failed to cache song data:", error);
+    //   // Continue with the upload process
+    // }
 
     return NextResponse.json({ ...image });
   } catch (e) {

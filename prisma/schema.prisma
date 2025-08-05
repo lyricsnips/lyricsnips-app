@@ -26,17 +26,10 @@ model Share {
   userId          String?
   user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   videoId         String
+  title           String
+  author          String
+  thumbnails      Json[]
   lyrics_preview_src  String
   lyricsJson      Json
   createdAt       DateTime @default(now())
-}
-
-model CachedSong {
-  id          String   @id @default(cuid())
-  videoId     String   @unique
-  thumbnails  Json[]
-  title       String
-  author      String
-  updatedAt   DateTime @default(now())
-  createdAt   DateTime @default(now())
 }

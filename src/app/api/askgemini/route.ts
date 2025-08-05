@@ -3,9 +3,36 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
 
+interface LyricData {
+  id: string;
+  text: string;
+  start_time: number;
+  end_time: number;
+  start?: number;
+  duration?: number;
+}
+
+interface SongInfo {
+  videoId: string;
+  title: string;
+  author: string;
+  thumbnails: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
+interface RequestBody {
+  query: string;
+  context: LyricData[];
+  selectedLyrics: LyricData[];
+  songInfo: SongInfo;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { query, context, selectedLyrics, songInfo } = await req.json();
+    const { query, context, selectedLyrics, songInfo } =
+      (await req.json()) as RequestBody;
 
     // Initialize the model
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -18,13 +45,13 @@ Song: "${songInfo?.title || "Unknown"}" by ${songInfo?.author || "Unknown"}
 
 Full Lyrics Context: ${
       context
-        ? context.map((lyric: any) => lyric.text).join(" ")
+        ? context.map((lyric: LyricData) => lyric.text).join(" ")
         : "Not available"
     }
 
 Selected Lyrics (User's focus): ${
       selectedLyrics
-        ? selectedLyrics.map((lyric: any) => lyric.text).join(" ")
+        ? selectedLyrics.map((lyric: LyricData) => lyric.text).join(" ")
         : "None selected"
     }
 

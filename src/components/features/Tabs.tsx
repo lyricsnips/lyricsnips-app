@@ -5,6 +5,7 @@ import { Search, FlameIcon } from "lucide-react";
 
 const geo = Geo({
   weight: ["400"],
+  subsets: ["latin"],
 });
 
 export default function Tabs() {
