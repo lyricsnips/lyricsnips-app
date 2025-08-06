@@ -1,7 +1,7 @@
 import { fetcher } from "@/lib/fetcher";
 
-const baseUrl =
-  process.env.NEXT_PUBLIC_YT_MUSIC_API_URL || "http://127.0.0.1:8000/";
+// Remove the baseUrl since we'll use relative paths for our API routes
+// const baseUrl = process.env.NEXT_PUBLIC_YT_MUSIC_API_URL || "http://127.0.0.1:8000/";
 
 // Type definitions
 interface SongData {
@@ -56,7 +56,7 @@ interface ErrorResponse {
 export async function getSongs(query: string) {
   try {
     const res = await fetcher<ApiResponse<SongData[]>>(
-      `${baseUrl}songs/search?query=${query}`,
+      `/api/songs/search?query=${encodeURIComponent(query)}`,
       {
         method: "GET",
       }
@@ -71,7 +71,7 @@ export async function getSongs(query: string) {
 export async function getLyrics(videoId: string) {
   try {
     const res = await fetcher<ApiResponse<LyricResponse>>(
-      `${baseUrl}songs/lyrics?video_id=${videoId}`,
+      `/api/songs/lyrics?video_id=${encodeURIComponent(videoId)}`,
       {
         method: "GET",
       }
@@ -106,7 +106,7 @@ export async function getSong(videoId: string) {
 
     // Fallback to Youtube API
     const res = await fetcher<ApiResponse<{ videoDetails: VideoDetails }>>(
-      `${baseUrl}songs/${videoId}`,
+      `/api/songs/${encodeURIComponent(videoId)}`,
       {
         method: "GET",
       }

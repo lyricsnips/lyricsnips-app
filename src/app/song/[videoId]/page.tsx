@@ -97,7 +97,7 @@ export default function SongPage({
   const { videoId } = React.use(params);
   const searchParams = useSearchParams();
   const [songInfo, setSongInfo] = useState<SongInfo>({} as SongInfo);
-  const [lyrics, setLyrics] = useState<Lyric[]>([]);
+  const [lyrics, setLyrics] = useState<Lyric[] | null>(null);
   const [currentLyric, setCurrentLyric] = useState<Lyric | null>(null);
   const [playerStatus, setPlayerStatus] = useState<number | undefined>(
     undefined
@@ -113,6 +113,8 @@ export default function SongPage({
   const [isSelecting, setIsSelecting] = useState(false);
   const [isAsking, setAsking] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [playerError, setPlayerError] = useState<string | null>(null);
+  const [showCopyrightAlert, setShowCopyrightAlert] = useState(false);
 
   // Auto-scroll hook
   const { handleUserScroll } = useAutoScroll(currentLyric);
@@ -120,6 +122,8 @@ export default function SongPage({
   // Effect 1: Fetch lyrics and set up YouTube player when videoId changes
   useEffect(() => {
     setIsLoading(true);
+    setPlayerError(null); // Clear any previous errors
+    setShowCopyrightAlert(false); // Reset copyright alert
 
     // Get song information from URL parameters
     const getSongInfo = () => {
@@ -137,7 +141,6 @@ export default function SongPage({
           timesShared: 0,
         });
       } else {
-        // Fallback: show loading state
         setSongInfo({
           videoId,
           title: "Loading...",
@@ -172,8 +175,36 @@ export default function SongPage({
       }
 
       if (playerDiv) {
-        // Create YouTube player instance
-        playerInstanceRef.current = YoutubePlayer(playerDiv);
+        // Create YouTube player instance with additional parameters
+        playerInstanceRef.current = YoutubePlayer(playerDiv, {
+          width: "100%",
+          height: "100%",
+          playerVars: {
+            // Add these parameters to help with domain restrictions and copyrighted content
+            origin: window.location.origin,
+            enablejsapi: 1,
+            rel: 0,
+            modestbranding: 1,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            iv_load_policy: 3,
+            showinfo: 0,
+            autoplay: 0,
+            // mute: 1, // Start muted to avoid autoplay restrictions
+            playsinline: 1, // Better mobile compatibility
+            // Additional parameters to help with copyright restrictions
+            cc_load_policy: 0, // Disable closed captions
+            color: "white", // Player color
+            hl: "en", // Language
+            loop: 0, // Don't loop
+            playlist: videoId, // Explicit playlist
+            // Add these parameters for better compatibility
+            widget_referrer: window.location.origin,
+            enablejsapi: 1,
+            version: 3,
+          },
+        });
 
         // Wait for the player to be ready before loading the video
         playerInstanceRef.current?.on("ready", () => {
@@ -188,6 +219,37 @@ export default function SongPage({
             setIsPlaying(state.data === 1); // 1 = playing
           }
         );
+
+        // Add error handling for restricted content
+        playerInstanceRef.current?.on("error", (event: { data: number }) => {
+          console.error("YouTube player error:", event.data);
+          // Handle different error codes
+          switch (event.data) {
+            case 2: // Invalid video ID
+              console.error("Invalid video ID");
+              setPlayerError("Invalid video ID");
+              break;
+            case 5: // HTML5 player error
+              console.error("HTML5 player error");
+              setPlayerError("Player error occurred");
+              break;
+            case 100: // Video not found
+              console.error("Video not found");
+              setPlayerError("Video not found");
+              break;
+            case 101: // Video not embeddable
+            case 150: // Video not embeddable
+              console.error(
+                "Video not embeddable - likely copyrighted content"
+              );
+              setShowCopyrightAlert(true);
+              setPlayerError(null); // Clear any other errors
+              break;
+            default:
+              console.error("Unknown YouTube player error");
+              setPlayerError("An error occurred while loading the video");
+          }
+        });
       }
       setIsLoading(false);
     };
@@ -301,10 +363,14 @@ export default function SongPage({
       )}
       <div className="h-full flex flex-col">
         <div className="flex border-b-1 overflow-hidden items-center justify-center h-fit p-2 relative">
-          {/* Background Player - positioned absolutely and centered */}
+          {/* Background Player - always show but with disabled styling */}
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
             <div
-              className="opacity-50 grayscale blur-lg"
+              className={`${
+                showCopyrightAlert
+                  ? "opacity-30 grayscale blur-lg" // More faded when disabled
+                  : "opacity-50 grayscale blur-lg"
+              }`}
               style={{
                 width: "calc(100vw + 600px)",
                 height: "calc(100vh + 600px)",
@@ -333,14 +399,56 @@ export default function SongPage({
                 </>
               )}
             </div>
-            {/* Controls Container */}
+
+            {/* Error Message Display */}
+            {playerError && (
+              <div className="w-full max-w-md mx-auto p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-red-400 text-sm font-medium">
+                    Player Error
+                  </span>
+                </div>
+                <p className="text-red-300 text-sm leading-relaxed">
+                  {playerError}
+                </p>
+              </div>
+            )}
+
+            {/* Copyright Overlay - semi-transparent overlay */}
+            {showCopyrightAlert && (
+              <div className=" inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-2 max-w-xs pointer-events-auto">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-red-400 text-sm font-medium">
+                      Copyright Restricted
+                    </span>
+                  </div>
+                  <p className="text-red-300 text-xs leading-relaxed">
+                    Audio disabled due to copyright restrictions. Lyrics
+                    selection still available.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Controls Container - always show but disable when copyright restricted */}
             <div className="flex flex-row items-center">
               {/* Restart Control */}
               <div className="flex flex-col items-center gap-2">
                 <button
                   onClick={handleRestart}
-                  className="bg-white/10 backdrop-blur-sm rounded-full p-3 hover:bg-white/20 transition-all duration-200 hover:scale-105"
-                  title="Restart song"
+                  disabled={showCopyrightAlert}
+                  className={`backdrop-blur-sm rounded-full p-3 transition-all duration-200 hover:scale-105 ${
+                    showCopyrightAlert
+                      ? "bg-gray-600/20 text-gray-400 cursor-not-allowed opacity-50"
+                      : "bg-white/10 hover:bg-white/20"
+                  }`}
+                  title={
+                    showCopyrightAlert
+                      ? "Disabled - Copyright restricted"
+                      : "Restart song"
+                  }
                 >
                   <RotateCcw size={18} />
                 </button>
@@ -350,11 +458,22 @@ export default function SongPage({
               </div>
 
               {/* Play/Pause Control */}
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-2 mx-4">
                 <button
                   onClick={handlePlayPause}
-                  className="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 transition-all duration-200 hover:scale-105"
-                  title={isPlaying ? "Pause" : "Play"}
+                  disabled={showCopyrightAlert}
+                  className={`backdrop-blur-sm rounded-full p-4 transition-all duration-200 hover:scale-105 ${
+                    showCopyrightAlert
+                      ? "bg-gray-600/20 text-gray-400 cursor-not-allowed opacity-50"
+                      : "bg-white/10 hover:bg-white/20"
+                  }`}
+                  title={
+                    showCopyrightAlert
+                      ? "Disabled - Copyright restricted"
+                      : isPlaying
+                      ? "Pause"
+                      : "Play"
+                  }
                 >
                   {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                 </button>
@@ -363,18 +482,16 @@ export default function SongPage({
                 </span>
               </div>
 
-              {/* Lyric Selection Control */}
+              {/* Selection Mode Control - always enabled */}
               <div className="flex flex-col items-center gap-2">
                 <button
                   onClick={toggleNavigationMode}
                   className={`backdrop-blur-sm rounded-full p-3 transition-all duration-200 hover:scale-105 ${
                     isSelecting
-                      ? "bg-red-500/20 hover:bg-red-500/30 text-red-400"
+                      ? "bg-blue-500/20 hover:bg-blue-500/30"
                       : "bg-white/10 hover:bg-white/20"
                   }`}
-                  title={
-                    isSelecting ? "Stop selecting lyrics" : "Select lyrics"
-                  }
+                  title="Toggle selection mode"
                 >
                   {isSelecting ? (
                     <PointerOff size={18} />
@@ -383,7 +500,7 @@ export default function SongPage({
                   )}
                 </button>
                 <span className="text-xs text-gray-400 w-16 text-center">
-                  {isSelecting ? "Stop" : "Select"}
+                  {isSelecting ? "Exit" : "Select"}
                 </span>
               </div>
             </div>

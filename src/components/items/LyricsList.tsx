@@ -95,7 +95,21 @@ export default function LyricsList({
     setAlert("");
   };
 
-  if (lyrics === null) {
+  // Show skeleton when lyrics is undefined or empty
+  if (!lyrics) {
+    return (
+      <div className="flex flex-col items-center  gap-10 w-full max-w-2xl p-4">
+        {[...Array(10)].map((_, index) => (
+          <div key={index} className="w-full flex flex-col items-center gap-2">
+            <div className="h-6 bg-gray-700/50 rounded animate-pulse mb-2 w-full"></div>
+            <div className="h-4 bg-gray-600/30 rounded animate-pulse w-3/4"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (lyrics.length === 0) {
     return (
       <div className="flex flex-col items-center text-center py-8">
         <p className="text-gray-300 mb-4">No lyrics available for this song</p>
@@ -105,20 +119,6 @@ export default function LyricsList({
         >
           Find Other Songs
         </button>
-      </div>
-    );
-  }
-
-  // Show skeleton when lyrics is undefined or empty
-  if (!lyrics || lyrics.length === 0) {
-    return (
-      <div className="flex flex-col items-center  gap-10 w-full max-w-2xl p-4">
-        {[...Array(10)].map((_, index) => (
-          <div key={index} className="w-full flex flex-col items-center gap-2">
-            <div className="h-6 bg-gray-700/50 rounded animate-pulse mb-2 w-full"></div>
-            <div className="h-4 bg-gray-600/30 rounded animate-pulse w-3/4"></div>
-          </div>
-        ))}
       </div>
     );
   }
