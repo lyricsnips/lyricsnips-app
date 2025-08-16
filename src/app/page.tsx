@@ -9,7 +9,7 @@ export default function Home() {
   const { currentTab } = useTabContext();
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-black">
       <div className="w-full flex justify-center flex-1 overflow-hidden">
         <div className="ml-3 mr-3 w-full max-w-4xl flex flex-col">
           <SearchBar />

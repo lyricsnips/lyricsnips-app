@@ -87,7 +87,7 @@ export default function Navbar() {
   const title = "LyricSnips";
 
   return (
-    <div className="w-full text-white px-3 py-2 relative flex items-center justify-center border-b-1">
+    <div className="w-full text-white px-3 py-2 relative flex items-center justify-center border-b-1 bg-black">
       <div
         className={`text-2xl ${gothic.className} cursor-pointer`}
         onClick={() => router.push("/")}

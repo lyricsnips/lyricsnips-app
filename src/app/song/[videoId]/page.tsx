@@ -361,7 +361,7 @@ export default function SongPage({
           onClose={() => setShowShareModal(false)}
         />
       )}
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col bg-black">
         <div className="flex border-b-1 overflow-hidden items-center justify-center h-fit p-2 relative">
           {/* Background Player - always show but with disabled styling */}
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
