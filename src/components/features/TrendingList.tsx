@@ -5,17 +5,7 @@ import { getTrendingSongs } from "@/adapters/YTAdapter";
 import { useTabContext } from "@/contexts/CurrentTabContext";
 import { useTrendingResultsContext } from "@/contexts/TrendingResultsContext";
 import { getSharedLyrics } from "@/adapters/lyricAdapter";
-
-interface SongData {
-  videoId: string;
-  title: string;
-  author: string;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-  lyrics?: unknown;
-}
+import { SongData } from "../../../types/SongTypes/Song";
 
 export default function TrendingList() {
   const { currentTab } = useTabContext();
@@ -30,18 +20,15 @@ export default function TrendingList() {
 
       const cleanResults = res.data.map((song: SongData) => {
         return {
-          videoId: song.videoId,
-          title: song.title,
+          ...song,
           thumbnails: `https://img.youtube.com/vi/${song.videoId}/maxresdefault.jpg`,
-          artists: song.author,
-          timesShared: song.count,
         };
       });
 
       setTrendingResults(cleanResults);
 
       const resultsMap: Map<string, SongData> = new Map(
-        cleanResults.map((song: SongData) => [song.videoId, song])
+        cleanResults.map((song: SongData) => [song.videoId, song]),
       );
 
       cleanResults.forEach(async (song: SongData) => {
@@ -71,10 +58,11 @@ export default function TrendingList() {
     }
   }, [currentTab, trendingResults.length, fetchTrendingSongs]);
 
-  const handlePlay = (songData: string) => {
+  const handlePlay = (songData: SongData) => {
+    console.log(songData);
     const params = new URLSearchParams({
       title: songData.title,
-      author: songData.artists,
+      author: songData.author,
       videoId: songData.videoId,
     });
     router.push(`/song/${songData.videoId}?${params.toString()}`);
@@ -83,7 +71,7 @@ export default function TrendingList() {
   return (
     <>
       <ul className="flex flex-col gap-4">
-        {trendingResults.map((song: SongData) => {
+        {trendingResults.map((song) => {
           return (
             <li key={song.videoId}>
               <SongCard

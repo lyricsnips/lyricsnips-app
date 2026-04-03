@@ -1,14 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-
-interface SongData {
-  videoId: string;
-  title: string;
-  author: string;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-}
+import { SongData } from "../../types/SongTypes/Song";
 
 interface TrendingResultsContextType {
   trendingResults: SongData[];
@@ -38,7 +29,7 @@ export function useTrendingResultsContext() {
   const context = useContext(TrendingResultsContext);
   if (!context) {
     throw new Error(
-      "useTrendingResultsContext must be used within a TrendingResultsProvider"
+      "useTrendingResultsContext must be used within a TrendingResultsProvider",
     );
   }
   return context;

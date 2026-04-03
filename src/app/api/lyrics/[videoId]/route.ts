@@ -13,7 +13,7 @@ interface ShareData {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ videoId: string }> }
+  { params }: { params: Promise<{ videoId: string }> },
 ) {
   const parameters = await params;
   const videoId = parameters.videoId;
@@ -49,15 +49,15 @@ export async function GET(
         });
 
         return { ...share, username: user?.username };
-      })
+      }),
     );
 
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in GET /api/lyrics:", error);
     return NextResponse.json(
-      { error: "Failed to fetch shares" },
-      { status: 500 }
+      { error: "Failed to fetch lyrics" },
+      { status: 500 },
     );
   }
 }

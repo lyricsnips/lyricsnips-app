@@ -24,18 +24,12 @@ import { useAuthModal } from "@/contexts/AuthModalContext";
 import AskChatBot from "@/components/features/AskChatbox";
 import type YouTubePlayer from "youtube-player";
 import { useSearchParams } from "next/navigation";
+import { Lyric } from "../../../../types/SongTypes/Song";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
   subsets: ["latin", "latin-ext"],
 });
-
-interface Lyric {
-  id: string;
-  text: string;
-  start_time: number;
-  end_time: number;
-}
 
 interface SongInfo {
   videoId: string;
@@ -100,13 +94,13 @@ export default function SongPage({
   const [lyrics, setLyrics] = useState<Lyric[] | null>(null);
   const [currentLyric, setCurrentLyric] = useState<Lyric | null>(null);
   const [playerStatus, setPlayerStatus] = useState<number | undefined>(
-    undefined
+    undefined,
   );
   const [isPlaying, setIsPlaying] = useState(false);
   const { selectedLyrics, setSelectedLyrics } = useSelectedLyrics();
   const playerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<ReturnType<typeof YouTubePlayer> | null>(
-    null
+    null,
   );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -165,13 +159,8 @@ export default function SongPage({
       if (!res.data) {
         setLyrics([]);
       } else {
-        const allLyrics: {
-          hasTimestamps: boolean;
-          lyrics: Array<Lyric>;
-          source: "Source: Musixmatch";
-        } = res.data;
-
-        setLyrics(allLyrics.lyrics);
+        const allLyrics = res.data.lyrics;
+        setLyrics(allLyrics);
       }
 
       if (playerDiv) {
@@ -189,20 +178,16 @@ export default function SongPage({
             disablekb: 1,
             fs: 0,
             iv_load_policy: 3,
-            showinfo: 0,
             autoplay: 0,
             // mute: 1, // Start muted to avoid autoplay restrictions
             playsinline: 1, // Better mobile compatibility
             // Additional parameters to help with copyright restrictions
-            cc_load_policy: 0, // Disable closed captions
             color: "white", // Player color
             hl: "en", // Language
             loop: 0, // Don't loop
             playlist: videoId, // Explicit playlist
             // Add these parameters for better compatibility
             widget_referrer: window.location.origin,
-            enablejsapi: 1,
-            version: 3,
           },
         });
 
@@ -217,39 +202,39 @@ export default function SongPage({
           (state: { data: number }) => {
             setPlayerStatus(state.data);
             setIsPlaying(state.data === 1); // 1 = playing
-          }
+          },
         );
 
         // Add error handling for restricted content
-        playerInstanceRef.current?.on("error", (event: { data: number }) => {
-          console.error("YouTube player error:", event.data);
-          // Handle different error codes
-          switch (event.data) {
-            case 2: // Invalid video ID
-              console.error("Invalid video ID");
-              setPlayerError("Invalid video ID");
-              break;
-            case 5: // HTML5 player error
-              console.error("HTML5 player error");
-              setPlayerError("Player error occurred");
-              break;
-            case 100: // Video not found
-              console.error("Video not found");
-              setPlayerError("Video not found");
-              break;
-            case 101: // Video not embeddable
-            case 150: // Video not embeddable
-              console.error(
-                "Video not embeddable - likely copyrighted content"
-              );
-              setShowCopyrightAlert(true);
-              setPlayerError(null); // Clear any other errors
-              break;
-            default:
-              console.error("Unknown YouTube player error");
-              setPlayerError("An error occurred while loading the video");
-          }
-        });
+        // playerInstanceRef.current?.on("error", (event: { data: number }) => {
+        //   console.error("YouTube player error:", event.data);
+        //   // Handle different error codes
+        //   switch (event.data) {
+        //     case 2: // Invalid video ID
+        //       console.error("Invalid video ID");
+        //       setPlayerError("Invalid video ID");
+        //       break;
+        //     case 5: // HTML5 player error
+        //       console.error("HTML5 player error");
+        //       setPlayerError("Player error occurred");
+        //       break;
+        //     case 100: // Video not found
+        //       console.error("Video not found");
+        //       setPlayerError("Video not found");
+        //       break;
+        //     case 101: // Video not embeddable
+        //     case 150: // Video not embeddable
+        //       console.error(
+        //         "Video not embeddable - likely copyrighted content",
+        //       );
+        //       setShowCopyrightAlert(true);
+        //       setPlayerError(null); // Clear any other errors
+        //       break;
+        //     default:
+        //       console.error("Unknown YouTube player error");
+        //       setPlayerError("An error occurred while loading the video");
+        //   }
+        // });
       }
       setIsLoading(false);
     };
@@ -274,7 +259,12 @@ export default function SongPage({
     if (intervalRef.current) clearInterval(intervalRef.current);
 
     // Only start syncing if player is playing, lyrics are loaded, and player exists
-    if (playerStatus === 1 && lyrics?.length > 0 && playerInstanceRef.current) {
+    if (
+      playerStatus === 1 &&
+      lyrics &&
+      lyrics.length > 0 &&
+      playerInstanceRef.current
+    ) {
       intervalRef.current = setInterval(async () => {
         const currentTime = await playerInstanceRef.current?.getCurrentTime();
         if (!currentTime) return;
@@ -471,8 +461,8 @@ export default function SongPage({
                     showCopyrightAlert
                       ? "Disabled - Copyright restricted"
                       : isPlaying
-                      ? "Pause"
-                      : "Play"
+                        ? "Pause"
+                        : "Play"
                   }
                 >
                   {isPlaying ? <Pause size={24} /> : <Play size={24} />}

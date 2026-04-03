@@ -81,7 +81,7 @@ Instructions:
         error: "Failed to generate response",
         success: false,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
