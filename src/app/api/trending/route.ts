@@ -35,17 +35,15 @@ export async function GET() {
           author: song?.author || "Unknown Artist",
           count: item._count.videoId,
         };
-      })
+      }),
     );
 
-    console.log(trendingSongs);
-
-    return NextResponse.json(trendingSongs);
+    return NextResponse.json({ data: trendingSongs });
   } catch (error) {
     console.error("Error in GET /api/trending:", error);
     return NextResponse.json(
       { error: "Failed to fetch trending songs" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

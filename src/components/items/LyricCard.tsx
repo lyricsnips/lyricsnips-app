@@ -25,7 +25,7 @@ interface CustomizeSettings {
 interface LyricCardProps {
   songInfo: SongInfo;
   settings: CustomizeSettings;
-  lyricCardRef: React.RefObject<HTMLDivElement>;
+  lyricCardRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function LyriCard({

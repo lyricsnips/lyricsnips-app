@@ -2,15 +2,7 @@ import { Sparkle, X, Send } from "lucide-react";
 import { askGemini } from "@/adapters/lyricAdapter";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { useState } from "react";
-
-interface LyricData {
-  id: string;
-  text: string;
-  start_time: number;
-  end_time: number;
-  start?: number;
-  duration?: number;
-}
+import { Lyric } from "../../../types/SongTypes/Song";
 
 interface SongInfo {
   videoId: string;
@@ -25,7 +17,7 @@ interface SongInfo {
 interface AskChatBotProps {
   setAsking: (asking: boolean) => void;
   songInfo: SongInfo;
-  lyrics: LyricData[];
+  lyrics: Lyric[] | null;
 }
 
 export default function AskChatBot({

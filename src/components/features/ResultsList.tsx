@@ -1,18 +1,7 @@
 import { useSearchResults } from "@/contexts/SearchResultsContext";
 import SongCard from "../items/SongCard";
 import { useRouter } from "next/navigation";
-
-interface SongData {
-  videoId: string;
-  title: string;
-  author: string;
-  artists: Array<{ id: string; name: string }>;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-  lyrics?: unknown;
-}
+import { SongData } from "../../../types/SongTypes/Song";
 
 export default function ResultsList() {
   const { results } = useSearchResults();

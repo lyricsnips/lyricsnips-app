@@ -12,20 +12,18 @@ export async function GET(request: NextRequest) {
     if (!video_id) {
       return NextResponse.json(
         { error: "video_id parameter is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const response = await fetch(
-      `${YT_MUSIC_API_URL}/songs/lyrics?video_id=${encodeURIComponent(
-        video_id
-      )}`,
+      `${YT_MUSIC_API_URL}/lyrics?videoId=${video_id}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -33,12 +31,13 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+
+    return NextResponse.json({ data: data });
   } catch (error) {
     console.error("Error in songs lyrics proxy:", error);
     return NextResponse.json(
       { error: "Failed to fetch lyrics" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,38 +1,15 @@
 import { fetcher } from "@/lib/fetcher";
-
-// Remove the baseUrl since we'll use relative paths for our API routes
-// const baseUrl = process.env.NEXT_PUBLIC_YT_MUSIC_API_URL || "http://127.0.0.1:8000/";
-
-// Type definitions
-interface SongData {
-  videoId: string;
-  title: string;
-  author: string;
-  thumbnails: Thumbnail[];
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-}
+import {
+  SongData,
+  ApiResponse,
+  LyricResponse,
+  Lyric,
+} from "../../types/SongTypes/Song";
 
 interface Thumbnail {
   url: string;
   width?: number;
   height?: number;
-}
-
-interface LyricData {
-  id: string;
-  text: string;
-  start_time: number;
-  end_time: number;
-  start?: number;
-  duration?: number;
-}
-
-interface LyricResponse {
-  hasTimestamps: boolean;
-  lyrics: Array<LyricData>;
-  source: "Source: Musixmatch";
 }
 
 interface VideoDetails {
@@ -45,10 +22,6 @@ interface VideoDetails {
   timesShared?: number;
 }
 
-interface ApiResponse<T> {
-  data?: T;
-}
-
 interface ErrorResponse {
   message: string;
 }
@@ -59,7 +32,7 @@ export async function getSongs(query: string) {
       `/api/songs/search?query=${encodeURIComponent(query)}`,
       {
         method: "GET",
-      }
+      },
     );
     return { data: res.data, error: null };
   } catch (e: unknown) {
@@ -74,8 +47,9 @@ export async function getLyrics(videoId: string) {
       `/api/songs/lyrics?video_id=${encodeURIComponent(videoId)}`,
       {
         method: "GET",
-      }
+      },
     );
+
     return { data: res.data, error: null };
   } catch (e: unknown) {
     const error = e as ErrorResponse;
@@ -83,43 +57,43 @@ export async function getLyrics(videoId: string) {
   }
 }
 
-export async function getSong(videoId: string) {
-  try {
-    // Try getting from database
-    interface CacheResponse {
-      data?: VideoDetails;
-    }
+// export async function getSong(videoId: string) {
+//   try {
+//     // Try getting from database
+//     interface CacheResponse {
+//       data?: VideoDetails;
+//     }
 
-    try {
-      const cache = await fetcher<CacheResponse>(`/api/cache/${videoId}`, {
-        method: "GET",
-      });
+//     try {
+//       const cache = await fetcher<CacheResponse>(`/api/cache/${videoId}`, {
+//         method: "GET",
+//       });
 
-      if (cache.data) {
-        console.log(`Song found in cache:`, cache.data);
-        return { data: cache.data, error: null };
-      }
-    } catch (error) {
-      console.error("Failed to fetch from cache:", error);
-      // Continue to YouTube API fallback
-    }
+//       if (cache.data) {
+//         console.log(`Song found in cache:`, cache.data);
+//         return { data: cache.data, error: null };
+//       }
+//     } catch (error) {
+//       console.error("Failed to fetch from cache:", error);
+//       // Continue to YouTube API fallback
+//     }
 
-    // Fallback to Youtube API
-    const res = await fetcher<ApiResponse<{ videoDetails: VideoDetails }>>(
-      `/api/songs/${encodeURIComponent(videoId)}`,
-      {
-        method: "GET",
-      }
-    );
+//     // Fallback to Youtube API
+//     const res = await fetcher<ApiResponse<{ videoDetails: VideoDetails }>>(
+//       `/api/songs/${encodeURIComponent(videoId)}`,
+//       {
+//         method: "GET",
+//       },
+//     );
 
-    console.log(res);
+//     console.log(res);
 
-    return { data: res.data?.videoDetails, error: null };
-  } catch (e: unknown) {
-    const error = e as ErrorResponse;
-    return { data: null, error: error.message || "Unknown error" };
-  }
-}
+//     return { data: res.data?.videoDetails, error: null };
+//   } catch (e: unknown) {
+//     const error = e as ErrorResponse;
+//     return { data: null, error: error.message || "Unknown error" };
+//   }
+// }
 
 export async function getTrendingSongs() {
   try {
@@ -127,7 +101,7 @@ export async function getTrendingSongs() {
       method: "GET",
     });
 
-    return { data: res, error: null };
+    return { data: res.data, error: null };
   } catch (e: unknown) {
     const error = e as ErrorResponse;
     return { data: null, error: error.message || "Unknown error" };

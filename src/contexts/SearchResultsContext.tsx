@@ -1,16 +1,6 @@
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
-
-interface SongData {
-  videoId: string;
-  title: string;
-  author: string;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-  lyrics?: unknown;
-}
+import { SongData } from "../../types/SongTypes/Song";
 
 interface ResultsContextType {
   results: SongData[];
@@ -18,7 +8,7 @@ interface ResultsContextType {
 }
 
 const SearchResultsContext = createContext<ResultsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function SearchResultsProvider({ children }: { children: ReactNode }) {

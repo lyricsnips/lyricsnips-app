@@ -6,33 +6,12 @@ import { Geo } from "next/font/google";
 import { getSharedLyrics } from "@/adapters/lyricAdapter";
 import Tabs from "./Tabs";
 import { Search } from "lucide-react";
+import { SongData } from "../../../types/SongTypes/Song";
 
 const geo = Geo({
   weight: ["400"],
   subsets: ["latin"],
 });
-
-interface ApiSongData {
-  videoId: string;
-  title: string;
-  artists: Array<{ id: string; name: string }>;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-}
-
-interface SongData {
-  videoId: string;
-  title: string;
-  author: string;
-  artists: Array<{ id: string; name: string }>;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-  lyrics?: unknown;
-}
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
@@ -49,7 +28,7 @@ export default function SearchBar() {
       if (!res.data) return;
 
       // Transform API response to match SongData interface
-      const transformedData = res.data.map((song: ApiSongData) => ({
+      const transformedData = res.data.map((song: SongData) => ({
         ...song,
         author: song.artists[0].name,
       }));
@@ -60,7 +39,7 @@ export default function SearchBar() {
 
       // Create a map to track updates
       const resultsMap: Map<string, SongData> = new Map(
-        transformedData.map((song: SongData) => [song.videoId, song])
+        transformedData.map((song: SongData) => [song.videoId, song]),
       );
 
       // Fetch lyrics and update immediately when each resolves

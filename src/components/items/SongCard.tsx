@@ -6,35 +6,17 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
-
-interface LyricObject {
-  id: string;
-  text: string;
-}
-
-interface LyricData {
-  id: string;
-  lyricsJson: LyricObject[];
-  username?: string;
-}
-
-interface Song {
-  videoId: string;
-  album?: { name: string };
-  artists: Array<{ id: string; name: string }>;
-  duration: string;
-  isExplicit: boolean;
-  thumbnails: { url: string }[];
-  title: string;
-  timesShared: number;
-  lyrics?: LyricData[] | undefined;
-}
+import {
+  SongData,
+  LyricData,
+  LyricObject,
+} from "../../../types/SongTypes/Song";
 
 export default function SongCard({
   song,
   handlePlay,
 }: {
-  song: Song;
+  song: SongData;
   handlePlay: (videoId: string) => void;
 }) {
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
@@ -89,7 +71,7 @@ export default function SongCard({
                                 {lyricObject.text}
                               </span>
                             );
-                          }
+                          },
                         )}
                       </div>
                     </div>
@@ -157,11 +139,12 @@ export default function SongCard({
             )}
           </div>
           <div className="text-sm text-gray-600">{artistNames}</div>
-          {song.timesShared > 0 && (
-            <div className="text-xs text-gray-500">
-              Shared: {song.timesShared} times
-            </div>
-          )}
+          {song.timesShared ||
+            (0 > 0 && (
+              <div className="text-xs text-gray-500">
+                Shared: {song.timesShared} times
+              </div>
+            ))}
         </div>
         <button
           className="cursor-pointer"

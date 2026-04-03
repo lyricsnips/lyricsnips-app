@@ -1,14 +1,6 @@
 import { fetcher } from "@/lib/fetcher";
 import { prisma } from "@/lib/prisma";
-
-interface LyricData {
-  id: string;
-  text: string;
-  start_time: number;
-  end_time: number;
-  start?: number;
-  duration?: number;
-}
+import { ApiResponse, LyricData, Lyric } from "../../types/SongTypes/Song";
 
 interface SongInfo {
   videoId: string;
@@ -22,12 +14,9 @@ interface SongInfo {
 
 interface AskGeminiTypes {
   query: string;
-  context: LyricData[];
+  context: Lyric[] | null;
   songInfo: SongInfo;
-}
-
-interface ApiResponse<T> {
-  data?: T;
+  selectedLyrics: Lyric[] | null;
 }
 
 interface ErrorResponse {
@@ -106,7 +95,7 @@ export async function getSharedLyrics(videoId: string) {
       `api/lyrics/${videoId}`,
       {
         method: "GET",
-      }
+      },
     );
     return { data: res, error: null };
   } catch (e: unknown) {
@@ -117,14 +106,13 @@ export async function getSharedLyrics(videoId: string) {
 
 export async function askGemini(body: AskGeminiTypes) {
   try {
-    const res = await fetcher<ApiResponse<{ answer: string }>>(
-      "/api/askgemini",
-      {
-        method: "POST",
-        body: body,
-      }
-    );
-    return { data: res, error: null };
+    const res = await fetcher<
+      ApiResponse<{ answer: string; success: boolean }>
+    >("/api/askgemini", {
+      method: "POST",
+      body: body,
+    });
+    return { data: res.data, error: null };
   } catch (e: unknown) {
     const error = e as ErrorResponse;
     return { data: null, error: error.message || "Unknown error" };

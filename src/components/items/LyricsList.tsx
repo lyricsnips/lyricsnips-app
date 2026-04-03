@@ -4,19 +4,13 @@ import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { defaultButtonStyle } from "@/styles/Buttons";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Lyric from "./Lyric";
+import LyricLine from "./LyricLine";
+import { Lyric } from "../../../types/SongTypes/Song";
 import { X } from "lucide-react";
 import type YouTubePlayer from "youtube-player";
 
-interface Lyric {
-  id: string;
-  text: string;
-  start_time: number;
-  end_time: number;
-}
-
 interface LyricsListProps {
-  lyrics: Lyric[];
+  lyrics: Lyric[] | null;
   currentLyric: Lyric | null;
   onUserScroll?: () => void;
   playerInstanceRef: React.RefObject<ReturnType<typeof YouTubePlayer> | null>;
@@ -176,11 +170,11 @@ export default function LyricsList({
                 currentLyric?.id === lyric.id ? "active" : ""
               }`}
             >
-              <Lyric
+              <LyricLine
                 lyric={lyric}
                 active={currentLyric?.id === lyric.id}
                 selected={selectedLyrics.some(
-                  (curr: any) => curr.id === lyric.id
+                  (curr: Lyric) => curr.id === lyric.id,
                 )}
                 handleSelect={handleSelect}
                 handleClick={handleClick}

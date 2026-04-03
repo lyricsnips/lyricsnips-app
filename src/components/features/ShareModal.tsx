@@ -86,7 +86,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
             else throw new Error("Failed to generate blob");
           },
           "image/png",
-          1.0
+          1.0,
         );
       });
 
@@ -99,12 +99,6 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       formData.append("image", blob, "component-image.png");
       formData.append("videoId", songInfo.videoId);
       formData.append("lyrics", JSON.stringify(selectedLyrics));
-      // formData.append(
-      //   "thumbnails",
-      //   JSON.stringify(
-      //     songInfo?.thumbnail?.thumbnails || songInfo?.thumbnails || []
-      //   )
-      // );
       formData.append("title", songInfo.title);
       formData.append("author", songInfo.author);
       formData.append("filename", `image-${Date.now()}.png`);
