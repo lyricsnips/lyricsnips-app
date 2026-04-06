@@ -3,16 +3,7 @@ import { askGemini } from "@/adapters/lyricAdapter";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
 import { useState } from "react";
 import { Lyric } from "../../../types/SongTypes/Song";
-
-interface SongInfo {
-  videoId: string;
-  title: string;
-  author: string;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-}
+import { SongInfo } from "../../../types/SongTypes/Song";
 
 interface AskChatBotProps {
   setAsking: (asking: boolean) => void;

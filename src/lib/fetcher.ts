@@ -7,11 +7,9 @@ export interface FetcherOptions {
 
 export async function fetcher<T>(
   url: RequestInfo,
-  options: FetcherOptions = {}
+  options: FetcherOptions = {},
 ): Promise<T> {
   const { method = "GET", body, headers = {}, responseType = "json" } = options;
-
-  console.log(`Trying fetch ${url}`);
 
   const fetchOptions: RequestInit = {
     method,

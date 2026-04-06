@@ -12,6 +12,16 @@ export interface SongData {
   album?: { name: string };
 }
 
+export interface SongInfo {
+  title: string;
+  channel: { name: string };
+  videoId: string;
+  thumbnails?: Array<{ url: string }>;
+  duration?: string;
+  isExplicit?: boolean;
+  timesShared?: number;
+}
+
 export interface Lyric {
   id: string;
   text: string;

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const YT_MUSIC_API_URL =
-  process.env.YT_MUSIC_API_URL ||
-  "https://yt-music-api-548129453770.northamerica-northeast1.run.app";
+const YT_MUSIC_API_URL = process.env.YT_MUSIC_API_URL;
 
 export async function GET(request: NextRequest) {
   try {

@@ -7,7 +7,8 @@ export async function GET(
   { params }: { params: { videoId: string } },
 ) {
   try {
-    const { videoId } = params;
+    const parameters = await params;
+    const videoId = parameters.videoId;
 
     if (!videoId) {
       return NextResponse.json(
@@ -17,12 +18,9 @@ export async function GET(
     }
 
     const response = await fetch(
-      `${YT_MUSIC_API_URL}/song?videoId=${videoId}`,
+      `https://serpapi.com/search.json\?engine\=youtube_video\&v\=${videoId}\&api_key\=${process.env.SERP_API_KEY}`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
       },
     );
 
@@ -32,7 +30,7 @@ export async function GET(
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in songs videoId proxy:", error);
     return NextResponse.json(
       { error: "Failed to fetch song details" },

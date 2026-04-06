@@ -7,14 +7,8 @@ export default function ResultsList() {
   const { results } = useSearchResults();
   const router = useRouter();
 
-  const handlePlay = (videoId: string, songData: SongData) => {
-    console.log(songData);
-    const params = new URLSearchParams({
-      title: songData.title,
-      author: songData.artists[0].name,
-      videoId: videoId,
-    });
-    router.push(`/song/${videoId}?${params.toString()}`);
+  const handlePlay = (videoId: string) => {
+    router.push(`/song/${videoId}`);
   };
 
   return (
@@ -34,7 +28,7 @@ export default function ResultsList() {
           <li key={song.videoId}>
             <SongCard
               song={songForCard}
-              handlePlay={() => handlePlay(song.videoId, song)}
+              handlePlay={() => handlePlay(song.videoId)}
             ></SongCard>
           </li>
         );
