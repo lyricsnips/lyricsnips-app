@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const YT_MUSIC_API_URL =
-  process.env.YT_MUSIC_API_URL ||
-  "https://yt-music-api-548129453770.northamerica-northeast1.run.app";
+const YT_MUSIC_API_URL = process.env.YT_MUSIC_API_URL;
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,6 +29,8 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+
+    console.log(data);
     return NextResponse.json({ data: data });
   } catch (error) {
     console.error("Error in songs search proxy:", error);

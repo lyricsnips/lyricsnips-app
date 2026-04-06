@@ -18,28 +18,18 @@ import YoutubePlayer from "youtube-player";
 import LyricsList from "@/components/items/LyricsList";
 import ShareModal from "@/components/features/ShareModal";
 import { useSelectedLyrics } from "@/contexts/SelectedLyricsContext";
-import { getLyrics } from "@/adapters/YTAdapter";
+import { getLyrics, getSong } from "@/adapters/YTAdapter";
 import { Special_Gothic_Expanded_One } from "next/font/google";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import AskChatBot from "@/components/features/AskChatbox";
 import type YouTubePlayer from "youtube-player";
-import { useSearchParams } from "next/navigation";
 import { Lyric } from "../../../../types/SongTypes/Song";
+import { SongInfo } from "../../../../types/SongTypes/Song";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
   subsets: ["latin", "latin-ext"],
 });
-
-interface SongInfo {
-  videoId: string;
-  title: string;
-  author: string;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-}
 
 // Custom hook for auto-scroll management
 const useAutoScroll = (currentLyric: Lyric | null) => {
@@ -89,7 +79,6 @@ export default function SongPage({
   const { data: session } = useSession();
   const { openModal } = useAuthModal();
   const { videoId } = React.use(params);
-  const searchParams = useSearchParams();
   const [songInfo, setSongInfo] = useState<SongInfo>({} as SongInfo);
   const [lyrics, setLyrics] = useState<Lyric[] | null>(null);
   const [currentLyric, setCurrentLyric] = useState<Lyric | null>(null);
@@ -119,32 +108,26 @@ export default function SongPage({
     setPlayerError(null); // Clear any previous errors
     setShowCopyrightAlert(false); // Reset copyright alert
 
-    // Get song information from URL parameters
-    const getSongInfo = () => {
-      const title = searchParams.get("title");
-      const author = searchParams.get("author");
+    // Get song information
+    const getSongInfo = async () => {
+      const songInfo = await getSong(videoId);
 
-      if (title && author) {
+      if (!songInfo?.data) {
         setSongInfo({
+          title: "Unknown",
+          channel: { name: "Unknown" },
           videoId,
-          title,
-          author,
-          thumbnails: [],
-          duration: undefined,
-          isExplicit: false,
-          timesShared: 0,
         });
-      } else {
-        setSongInfo({
-          videoId,
-          title: "Loading...",
-          author: "Loading...",
-          thumbnails: [],
-          duration: undefined,
-          isExplicit: false,
-          timesShared: 0,
-        });
+        return;
       }
+
+      const relevantSongInfo = {
+        title: songInfo.data.title,
+        channel: { name: songInfo.data.channel.name },
+        videoId,
+      };
+
+      setSongInfo(relevantSongInfo);
     };
 
     let isMounted = true;
@@ -156,11 +139,11 @@ export default function SongPage({
 
       if (!isMounted) return;
 
-      if (!res.data) {
-        setLyrics([]);
-      } else {
+      if (res?.data?.lyrics) {
         const allLyrics = res.data.lyrics;
         setLyrics(allLyrics);
+      } else {
+        setLyrics([]);
       }
 
       if (playerDiv) {
@@ -204,37 +187,6 @@ export default function SongPage({
             setIsPlaying(state.data === 1); // 1 = playing
           },
         );
-
-        // Add error handling for restricted content
-        // playerInstanceRef.current?.on("error", (event: { data: number }) => {
-        //   console.error("YouTube player error:", event.data);
-        //   // Handle different error codes
-        //   switch (event.data) {
-        //     case 2: // Invalid video ID
-        //       console.error("Invalid video ID");
-        //       setPlayerError("Invalid video ID");
-        //       break;
-        //     case 5: // HTML5 player error
-        //       console.error("HTML5 player error");
-        //       setPlayerError("Player error occurred");
-        //       break;
-        //     case 100: // Video not found
-        //       console.error("Video not found");
-        //       setPlayerError("Video not found");
-        //       break;
-        //     case 101: // Video not embeddable
-        //     case 150: // Video not embeddable
-        //       console.error(
-        //         "Video not embeddable - likely copyrighted content",
-        //       );
-        //       setShowCopyrightAlert(true);
-        //       setPlayerError(null); // Clear any other errors
-        //       break;
-        //     default:
-        //       console.error("Unknown YouTube player error");
-        //       setPlayerError("An error occurred while loading the video");
-        //   }
-        // });
       }
       setIsLoading(false);
     };
@@ -251,7 +203,7 @@ export default function SongPage({
         playerInstanceRef.current = null;
       }
     };
-  }, [videoId, searchParams]);
+  }, [videoId]);
 
   // Effect 2: Sync lyrics with video playback when player is playing
   useEffect(() => {
@@ -384,7 +336,7 @@ export default function SongPage({
                   <h3
                     className={`text-center ${gothic.className} text-1xl text-gray-300`}
                   >
-                    {songInfo?.author ?? "Unknown"}
+                    {songInfo?.channel?.name ?? "Unknown"}
                   </h3>
                 </>
               )}
@@ -499,13 +451,15 @@ export default function SongPage({
 
         <div className="flex-1 overflow-y-auto flex flex-col justify-start items-center gap-5 pb-20">
           <div className="w-full flex justify-center">
-            <LyricsList
-              lyrics={lyrics}
-              currentLyric={currentLyric}
-              onUserScroll={handleUserScroll}
-              playerInstanceRef={playerInstanceRef}
-              isSelecting={isSelecting}
-            />
+            {
+              <LyricsList
+                lyrics={lyrics}
+                currentLyric={currentLyric}
+                onUserScroll={handleUserScroll}
+                playerInstanceRef={playerInstanceRef}
+                isSelecting={isSelecting}
+              />
+            }
           </div>
           {lyrics && lyrics.length > 0 && (
             <p className="text-gray-400 text-sm">Source: Musixmatch</p>
@@ -533,13 +487,20 @@ export default function SongPage({
             <button
               type="button"
               className={`${defaultButtonStyle}`}
-              onClick={handleAskClick}
+              // Disabling for now due to Gemini usage restrictions
+              // onClick={handleAskClick}
             >
               <Sparkle
                 size="20"
-                className={session ? "white" : "text-gray-500"}
+                // className={session ? "white" : "text-gray-500"}
+                className={"text-gray-500"}
               />
-              <span className={session ? "white" : "text-gray-500 "}>Ask</span>
+              <span
+                // className={session ? "white" : "text-gray-500 "}
+                className={"text-gray-500 "}
+              >
+                Ask (Disabled)
+              </span>
             </button>
           </div>
         )}

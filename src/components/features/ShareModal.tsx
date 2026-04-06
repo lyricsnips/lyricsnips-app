@@ -8,21 +8,12 @@ import CustomizeMenu, { CustomizeSettings } from "../menus/CustomizeMenu";
 import { Special_Gothic_Expanded_One } from "next/font/google";
 import LyriCard from "../items/LyricCard";
 import { defaultButtonStyle } from "@/styles/Buttons";
+import { SongInfo } from "../../../types/SongTypes/Song";
 
 const gothic = Special_Gothic_Expanded_One({
   weight: ["400"],
   subsets: ["latin", "latin-ext"],
 });
-
-interface SongInfo {
-  videoId: string;
-  title: string;
-  author: string;
-  thumbnails: Array<{ url: string }>;
-  duration?: string;
-  isExplicit?: boolean;
-  timesShared?: number;
-}
 
 interface ShareModalProps {
   songInfo: SongInfo;
@@ -100,7 +91,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       formData.append("videoId", songInfo.videoId);
       formData.append("lyrics", JSON.stringify(selectedLyrics));
       formData.append("title", songInfo.title);
-      formData.append("author", songInfo.author);
+      formData.append("author", songInfo.channel.name);
       formData.append("filename", `image-${Date.now()}.png`);
 
       // Upload to S3 and return link to image
