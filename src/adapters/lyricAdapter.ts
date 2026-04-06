@@ -46,8 +46,6 @@ export async function generateImage({
 
 export async function fetchSharedLyrics(shareId: string) {
   try {
-    console.log("Fetching shared lyrics for shareId:", shareId);
-
     const share = await prisma.share.findUnique({
       where: { id: shareId },
       include: {

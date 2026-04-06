@@ -19,7 +19,6 @@ export async function getSongs(query: string) {
       },
     );
 
-    console.log(res);
     return { data: res.data, error: null };
   } catch (e: unknown) {
     const error = e as ErrorResponse;

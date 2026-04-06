@@ -45,7 +45,6 @@ export async function removeFromS3ByUrl({ imageUrl }: { imageUrl: string }) {
     });
 
     await s3.send(command);
-    console.log(`Successfully deleted ${key} from S3`);
     return true;
   } catch (error) {
     console.error(`Error deleting from S3:`, error);

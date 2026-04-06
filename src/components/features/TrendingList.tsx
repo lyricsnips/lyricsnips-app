@@ -58,14 +58,8 @@ export default function TrendingList() {
     }
   }, [currentTab, trendingResults.length, fetchTrendingSongs]);
 
-  const handlePlay = (songData: SongData) => {
-    console.log(songData);
-    const params = new URLSearchParams({
-      title: songData.title,
-      author: songData.author,
-      videoId: songData.videoId,
-    });
-    router.push(`/song/${songData.videoId}?${params.toString()}`);
+  const handlePlay = (videoId: string) => {
+    router.push(`/song/${videoId}`);
   };
 
   return (
@@ -76,7 +70,7 @@ export default function TrendingList() {
             <li key={song.videoId}>
               <SongCard
                 song={song}
-                handlePlay={() => handlePlay(song)}
+                handlePlay={() => handlePlay(song.videoId)}
               ></SongCard>
             </li>
           );

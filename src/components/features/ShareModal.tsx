@@ -111,7 +111,6 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
           ...result,
           shareURL: `${window.location.origin}/shared/${result.id}`,
         });
-      console.log("Image uploaded successfully:", result);
     } catch (error) {
       console.error("Error generating image:", error);
     }
@@ -128,7 +127,7 @@ export default function ShareModal({ songInfo, onClose }: ShareModalProps) {
       console.error("Failed to copy: ", err);
       // Fallback for older browsers and iOS
       const textArea = document.createElement("textarea");
-      textArea.value = shareData.shareURL; // Fixed: was songInfo.shareURL
+      textArea.value = shareData.shareURL;
       textArea.style.position = "fixed";
       textArea.style.left = "-999999px";
       textArea.style.top = "-999999px";

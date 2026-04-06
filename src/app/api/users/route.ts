@@ -19,7 +19,7 @@ export async function GET() {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Failed to fetch users" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -28,12 +28,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();
-    
-    console.log(username, password);
 
     // Hash the password
     const password_hash = await bcrypt.hash(password, 12);
-
 
     // Create user
     const user = await prisma.user.create({
@@ -58,13 +55,13 @@ export async function POST(request: NextRequest) {
     if (prismaError.code === "P2002") {
       return NextResponse.json(
         { error: "Username already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { error: "Failed to create user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

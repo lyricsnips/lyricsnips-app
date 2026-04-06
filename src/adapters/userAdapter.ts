@@ -21,8 +21,6 @@ export async function createUser(userData: UserData) {
       method: "POST",
       body: userData,
     });
-
-    console.log(res);
     return { data: res.data, error: null };
   } catch (e: unknown) {
     const error = e as ErrorResponse;
