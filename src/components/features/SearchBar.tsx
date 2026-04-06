@@ -17,6 +17,7 @@ export default function SearchBar() {
   const [query, setQuery] = useState("");
   const { setSearchResults } = useSearchResults();
   const { setTab } = useTabContext();
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +26,9 @@ export default function SearchBar() {
       // Fetch from external YT python API
       const res = await getSongs(query);
 
-      if (!res.data) return;
+      if (!res.data || !Array.isArray(res.data)) {
+        throw Error("Invalid server response");
+      }
 
       // Transform API response to match SongData interface
       const transformedData = res.data.map((song: SongData) => ({
@@ -57,8 +60,9 @@ export default function SearchBar() {
           console.warn(`Failed to fetch lyrics for ${song.videoId}:`, error);
         }
       });
-    } catch (error) {
-      console.error("Error fetching songs or lyrics:", error);
+    } catch (error: unknown) {
+      setErrorMessage("Invalid Server Response. Please try again Later :(");
+      console.error("Error fetching songs:", (error as Error).message);
     }
   };
 
@@ -84,6 +88,7 @@ export default function SearchBar() {
           </div>
         </form>
       </div>
+      <p style={{ textAlign: "center" }}>{errorMessage}</p>
       <Tabs />
     </>
   );

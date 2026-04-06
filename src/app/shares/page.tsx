@@ -60,7 +60,6 @@ export default function SharesPage() {
     try {
       const res = await deleteShare(shareId);
       if (res.data) {
-        console.log(res.data);
         const updatedhares = shares.filter((share) => share.id !== shareId);
         setShares(updatedhares);
       }

@@ -10,10 +10,6 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
-    console.log("Session:", session);
-    console.log("User ID:", userId);
-    console.log("User ID type:", typeof userId);
-
     const formData = await req.formData();
     const imageFile = formData.get("image") as File;
     const videoId = formData.get("videoId") as string;
@@ -26,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (!imageFile || !videoId || !lyrics) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -58,32 +54,6 @@ export async function POST(req: NextRequest) {
         lyrics_preview_src: true,
       },
     });
-
-    // Store in cache for trending tab to fetch in the future
-    // Disable cache since author and title stored in url params
-    // try {
-    //   await prisma.cachedSong.upsert({
-    //     where: {
-    //       videoId: videoId,
-    //     },
-    //     update: {
-    //       title: title,
-    //       author: author,
-    //       thumbnails: JSON.parse(thumbnailsRaw),
-    //       updatedAt: new Date(),
-    //     },
-    //     create: {
-    //       videoId: videoId,
-    //       title: title,
-    //       author: author,
-    //       thumbnails: JSON.parse(thumbnailsRaw),
-    //     },
-    //   });
-    // } catch (error) {
-    //   // Log the error but don't fail the upload
-    //   console.log("Failed to cache song data:", error);
-    //   // Continue with the upload process
-    // }
 
     return NextResponse.json({ ...image });
   } catch (e) {
